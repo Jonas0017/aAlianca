@@ -1,0 +1,20 @@
+# Segredos — nunca commitar
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Dependências / build (para projetos futuros nesta base)
+node_modules/
+dist/
+build/
+__pycache__/
+*.log
