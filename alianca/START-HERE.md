@@ -41,6 +41,8 @@ Um **harness adaptativo**: estrutura + instruções que se moldam ao **projeto**
              gere um snapshot e consolide a memória.
 ```
 
+> **É um loop, não uma fila:** se o VERIFICAR falha, diagnostique a causa e volte ao AGIR com a abordagem ajustada — não insista no que não funcionou nem declare pronto. Erro que **se repete** vira regra em `memory/feedback.md` — o harness aprende e não erra duas vezes.
+
 ---
 
 ## 5. Invariantes (valem sempre, em todos os níveis)
