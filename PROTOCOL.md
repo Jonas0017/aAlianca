@@ -132,13 +132,14 @@ Três eixos, cada um pontuado **0–100**. **Não se somam num número só** —
 O **Nível do Harness** (0–4) vem da combinação dos eixos, não de uma soma.
 
 ```
-Nível base = faixa de  max(E, L)        // tamanho e tempo definem a "espinha"
-Ajuste de risco        = R alto sugere +1 nível (cap 4); qualquer sinal sensível engaja segurança (proporcional)
+Nível base = banda(E)                   // a estrutura real (tamanho/complexidade) define a "espinha"
+Ajuste     = +1 se Longevidade alta (anos/contínuo); +1 se Risco alto (cofre / 2+ sinais) — cap 4
+Segurança  = qualquer sinal sensível engaja, proporcional ao risco (não depende do nível)
 ```
 
 > O nível é uma **estimativa inicial**, revisada continuamente pelo comportamento real do projeto (ver §12 e a instrução `migration`) — sobe ou rebaixa. Não é um veredito do questionário.
 
-| max(E, L) | Nível base |
+| Estrutura (E) | Nível base |
 |---|---|
 | 0–20 | 0 |
 | 21–40 | 1 |

@@ -84,16 +84,17 @@ Converta cada eixo em **banda (0–4)**:
 ## Passo 3 — Nível (estimativa inicial)
 
 ```
-nível_base = banda( max(E, L) )
-SE R alto (≥ ~40 / dois ou mais sinais sensíveis):  proponha nível_base + 1 (cap 4)
-SENÃO:                                              nível = nível_base
+nível_base = banda(E)                                    // a estrutura real (tamanho/complexidade) define a espinha
++1 se Longevidade é alta (anos / manutenção contínua)    // durabilidade pede versionar e documentar, não inchar
++1 se Risco é alto (um "cofre", ou dois+ sinais sensíveis)
+nível = min(soma, 4)
 ```
 
 Este nível é uma **estimativa de partida**, não um veredito. O questionário pode subestimar e o usuário pode se enganar — então o harness **observa o comportamento real ao longo do projeto e reajusta** (sobe ou rebaixa) via `migration` e `health-check`.
 
-**Segurança é proporcional ao risco, não um interruptor.** Qualquer sinal sensível (login, dados de pessoas) já engaja a base de segurança e o `memory/security.md`; você **sugere** o reforço em linguagem simples ("tem dados de pessoas, vou reforçar um pouco a segurança"). Um "cofre" (pagamento, setor regulado) engaja medidas mais profundas. Não imponha segurança ultra onde não há cofre (ver `security`).
+**A estrutura real define a espinha.** Longevidade e Risco **ajustam**, mas não incham sozinhos: um projeto simples — por mais duradouro que seja — começa enxuto (longevidade vira só versionar/documentar) e sobe de nível quando a complexidade real aparece.
 
-**Longevidade alta sozinha não exige estrutura pesada:** um projeto simples mas duradouro começa enxuto e sobe só quando a complexidade real aparecer.
+**Segurança é proporcional ao risco, não um interruptor.** Qualquer sinal sensível (login, dados de pessoas) já engaja a base de segurança e o `memory/security.md`; você **sugere** o reforço em linguagem simples ("tem dados de pessoas, vou reforçar um pouco a segurança"). Um "cofre" (pagamento, setor regulado) engaja medidas mais profundas. Não imponha segurança ultra onde não há cofre (ver `security`).
 
 ---
 

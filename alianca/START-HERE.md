@@ -24,7 +24,7 @@ Um **harness adaptativo**: estrutura + instruções que se moldam ao **projeto**
 
 1. Carregue a instrução **`setup`** (veja `router.md`) e conduza o **questionário progressivo**.
 2. **Classifique a persona** pela pergunta de abertura: P0 (leigo) · P1 (iniciante) · P2 (dev) · P3 (time/org).
-3. **Pontue os 3 eixos** — Estrutura (E), Longevidade (L), Risco (R) — e calcule o **Nível (0–4)**: nível base = faixa de `max(E,L)`; se `R ≥ 40`, sobe +1 nível e força módulos de segurança.
+3. **Pontue os 3 eixos** — Estrutura (E), Longevidade (L), Risco (R) — e calcule o **Nível (0–4)**, uma **estimativa inicial**: base = `banda(E)`; **+1** se Longevidade alta, **+1** se Risco alto (cap 4). Qualquer sinal sensível engaja a segurança, proporcional ao risco.
 4. **Mostre a estrutura proposta e confirme (dry-run)** antes de criar arquivos.
 5. **Gere** a estrutura do nível: memória mínima (`memory/active-context.md` + `memory/stack.md`; `vision.md` a partir do Nível 1) e, **a partir do Nível 1**, um snapshot inicial em `snapshots/`.
 
