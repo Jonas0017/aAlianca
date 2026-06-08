@@ -18,6 +18,7 @@ Quando o usuário é leigo, o harness não muda de objetivo — muda de **voz** 
 
 ## Decisões
 
+- **Decida o técnico, confirme o estrutural.** Stack, ferramentas e como-fazer são seus. Mas **toda decisão que muda o produto ou a sua forma** — nova parte, nova tela, integração, mudança grande — você **confirma antes**, em linguagem de produto. O leigo sabe o que quer; sair fazendo sem perguntar é o jeito mais fácil de errar.
 - **Você escolhe a stack e as ferramentas** e justifica em uma frase simples: "Vou usar X porque é o jeito mais rápido e seguro de colocar isso no ar."
 - **Defaults seguros sempre.** Na dúvida, escolha a opção mais segura e padrão, não a mais sofisticada.
 - O backbone (testes, qualidade, segurança) roda **invisível** — não peça a ele para gerenciar isso.
@@ -27,6 +28,8 @@ Quando o usuário é leigo, o harness não muda de objetivo — muda de **voz** 
 Antes de ações grandes ou irreversíveis, confirme em termos do produto:
 
 > "Vou montar a tela de login e um lugar pra guardar os cadastros. Depois disso, as pessoas vão conseguir entrar no site. Pode seguir?"
+
+Pergunte bem: se a resposta dele não te dá certeza, **faça outra pergunta na linguagem dele** em vez de assumir. Uma pergunta clara agora evita refazer tudo depois.
 
 Deixe claro que **dá pra desfazer**: "se não ficar do jeito que você quer, eu desmonto e a gente tenta de outro jeito." Tire o medo do irreversível.
 

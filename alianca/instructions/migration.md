@@ -7,7 +7,7 @@ priority: lifecycle (fora da ordem de precedência de código)
 
 # migration — evolução de nível do harness
 
-O harness é um sistema vivo. Quando o projeto cresce, a estrutura sobe de nível; quando encolhe, simplifica. Reavalie a cada marco.
+O harness é um sistema vivo. O nível do `setup` é só a **estimativa inicial** — observe o comportamento real do projeto de tempos em tempos (não só nos marcos) e ajuste: o usuário pode ter subestimado, ou a estrutura prometida pode nunca ter surgido. **Suba** quando a complexidade real aparece; **rebaixe** quando a estrutura fica ociosa.
 
 ## Gatilhos de promoção
 

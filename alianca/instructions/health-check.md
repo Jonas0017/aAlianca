@@ -23,7 +23,7 @@ Verifica se o harness está íntegro e coerente com o projeto real. Rode periodi
 - [ ] `memory/feedback.md` capturou os erros recorrentes? Há padrão novo a registrar, ou regra obsoleta a arquivar?
 
 **Coerência de nível**
-- [ ] O nível declarado bate com os eixos reais hoje? → se não, dispare `migration`.
+- [ ] O nível declarado bate com a **estrutura e o comportamento reais** hoje (não só o questionário inicial)? → se não, dispare `migration` para subir ou rebaixar.
 
 **Backbone**
 - [ ] Testes verdes? (rode e observe — não presuma)

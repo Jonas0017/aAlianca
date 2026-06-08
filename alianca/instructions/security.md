@@ -9,10 +9,12 @@ priority: security (MÁXIMA — nunca sacrificada por estilo ou velocidade)
 
 Segurança não é uma fase final; é uma restrição em cada decisão. Esta instrução tem prioridade máxima.
 
-## Segredos (vale em qualquer projeto, desde o nível 1)
+**Proporcional ao risco real** (mapeado no questionário): qualquer sinal sensível — login, dados de pessoas — já levanta a base; um "cofre" (pagamentos, setor regulado) levanta mais. Nem todo projeto precisa de segurança ultra. Você já conhece as boas práticas — o papel do harness é **garantir que foram feitas, não reensinar**: valide cada uma, não deixe esquecer.
 
-- **Nunca** hardcode ou commite credencial, token, chave ou senha.
-- `.gitignore` cobrindo segredos; `.env.example` com as chaves **sem valores**; valores reais só em `.env` local / secret manager.
+## Segredos (sempre que houver qualquer credencial)
+
+- **`.env` é obrigatório** assim que existir qualquer credencial — em **qualquer nível**. **Todas** as credenciais vão nele; o `.gitignore` cobre o `.env`; o `.env.example` lista as chaves **sem valores**.
+- **Nunca** hardcode, commite, logue ou exponha credencial, token, chave ou senha. Senha (de banco/serviço): use senha forte e **nunca a mostre**.
 - **Nunca logue** segredos nem dados pessoais.
 
 ## Superfícies sensíveis
@@ -35,13 +37,14 @@ Você já conhece as defesas de cada superfície — aplique-as. O que o harness
 
 - Lockfile versionado; **scan de vulnerabilidade** em dependências (nível ≥ 2); revise licenças.
 
-## Por nível
+## Profundidade — proporcional ao risco
 
-| Nível | Reforço |
+| Sinal de risco | Reforço (valide que foi feito) |
 |---|---|
-| 1 | segredos fora do repo; HTTPS; hash de senha |
-| 2–3 | separação dev/stage/prod; scan de deps; `memory/security.md`; review de mudanças sensíveis |
-| 4 | threat model, `audits/`, testes de segurança, rotação de segredos |
+| Qualquer credencial no projeto | `.env` + segredos fora do repo (sempre) |
+| Login / dados de pessoas | hash forte de senha; HTTPS; autorização negada por padrão; `memory/security.md` |
+| "Cofre": pagamento / setor regulado | + separação dev/stage/prod; scan de deps; review de mudança sensível |
+| Escala alta (Nível 4) | + threat model, `audits/`, testes de segurança, rotação de segredos |
 
 ## Registro
 

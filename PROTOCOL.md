@@ -123,7 +123,7 @@ Três eixos, cada um pontuado **0–100**. **Não se somam num número só** —
 | Pagamentos / dados financeiros | +30 |
 | Requisito regulatório explícito (saúde, fintech, gov) | +35 |
 
-> R é **clampeado em 100** e tratado como **eixo dominante**: qualquer R ≥ 40 **força** os módulos de segurança/auditoria, independentemente de E e L.
+> R é **clampeado em 100**. Qualquer sinal sensível **engaja a segurança** — proporcional ao risco (base para login/dados; profundo para pagamento/regulado), nunca dependente de E ou L. R alto **sugere** subir o nível (ver §5).
 
 ---
 
@@ -133,8 +133,10 @@ O **Nível do Harness** (0–4) vem da combinação dos eixos, não de uma soma.
 
 ```
 Nível base = faixa de  max(E, L)        // tamanho e tempo definem a "espinha"
-Ajuste de risco        = se R ≥ 40, sobe +1 nível (cap 4) E adiciona módulos de segurança
+Ajuste de risco        = R alto sugere +1 nível (cap 4); qualquer sinal sensível engaja segurança (proporcional)
 ```
+
+> O nível é uma **estimativa inicial**, revisada continuamente pelo comportamento real do projeto (ver §12 e a instrução `migration`) — sobe ou rebaixa. Não é um veredito do questionário.
 
 | max(E, L) | Nível base |
 |---|---|
@@ -433,6 +435,6 @@ Ideias que não estavam no escopo original mas que, na minha avaliação, são o
 1. ~~Nome definitivo~~ → **resolvido: Aliança**, slogan "o elo que liga os dois mundos" (§14).
 2. ~~Idioma dos artefatos gerados~~ → **resolvido: seguem o idioma do usuário** — a LLM já faz isso naturalmente, então o harness não instrui nada a respeito (evita carregar o que o modelo já sabe).
 3. ~~Formato de entrega da Aliança~~ → **resolvido: pasta-referência em `.md` puro** (model-agnostic; adapters por ferramenta no §13).
-4. **Calibração da rubrica** — os pesos do §4 precisam de validação com projetos reais.
-5. **P0 (leigo): até onde automatizar** — o quanto o LLM decide sozinho sem confirmar.
+4. ~~Calibração da rubrica~~ → **encaminhada:** o nível do `setup` é estimativa inicial; o harness observa o comportamento real e reajusta (sobe/rebaixa) via `migration`/`health-check`. Segurança é **proporcional ao risco**, não um corte em R≥40. Pesos finos seguem evoluindo no uso real.
+5. ~~P0: até onde automatizar~~ → **resolvido:** o LLM decide o técnico reversível, mas **confirma cada decisão estrutural** em linguagem do leigo — e pergunta melhor em vez de assumir. O leigo sabe o que quer; sair fazendo sem perguntar é o jeito mais fácil de errar.
 ```

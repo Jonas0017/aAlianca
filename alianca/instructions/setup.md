@@ -81,15 +81,19 @@ Converta cada eixo em **banda (0–4)**:
 
 ---
 
-## Passo 3 — Cálculo do Nível
+## Passo 3 — Nível (estimativa inicial)
 
 ```
 nível_base = banda( max(E, L) )
-SE R ≥ 40:  nível = min(nível_base + 1, 4)  E  módulos de segurança tornam-se obrigatórios
-SENÃO:      nível = nível_base
+SE R alto (≥ ~40 / dois ou mais sinais sensíveis):  proponha nível_base + 1 (cap 4)
+SENÃO:                                              nível = nível_base
 ```
 
-Risco é o eixo dominante: `R ≥ 40` força `memory/security.md` e a instrução `security`, mesmo que E e L sejam baixos.
+Este nível é uma **estimativa de partida**, não um veredito. O questionário pode subestimar e o usuário pode se enganar — então o harness **observa o comportamento real ao longo do projeto e reajusta** (sobe ou rebaixa) via `migration` e `health-check`.
+
+**Segurança é proporcional ao risco, não um interruptor.** Qualquer sinal sensível (login, dados de pessoas) já engaja a base de segurança e o `memory/security.md`; você **sugere** o reforço em linguagem simples ("tem dados de pessoas, vou reforçar um pouco a segurança"). Um "cofre" (pagamento, setor regulado) engaja medidas mais profundas. Não imponha segurança ultra onde não há cofre (ver `security`).
+
+**Longevidade alta sozinha não exige estrutura pesada:** um projeto simples mas duradouro começa enxuto e sobe só quando a complexidade real aparecer.
 
 ---
 
