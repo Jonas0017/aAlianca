@@ -107,10 +107,12 @@ Risco é o eixo dominante: `R ≥ 40` força `memory/security.md` e a instruçã
 
 > O **backbone** (testes, qualidade, refatoração, prevenção de bugs) existe em **todos** os níveis — só muda a profundidade.
 
-- **Nível 0:** `README.md`, `TASKS.md`. Backbone automático/invisível.
-- **Nível 1:** + `ARCHITECTURE.md`. Backbone simples explícito.
-- **Nível 2:** `docs/` (`requirements`, `architecture`), `tasks/backlog.md`, `tests/`, CI básico, `memory/` (vision, active-context).
-- **Nível 3:** `docs/` (+ `business-rules`, `security` se R≥40, `decisions`), `memory/` segmentada, `tests/` completo, snapshots periódicos. Agents conforme a stack.
+> **Memória mínima existe desde o Nível 0:** `memory/active-context.md` (estado para retomar) e `memory/stack.md` (ferramentas). É o que o `START-HERE.md §2` usa para detectar "projeto em andamento". A memória **segmentada** (architecture, business-rules, decisions, archive) cresce a partir do Nível 2-3.
+
+- **Nível 0:** `README.md`, `TASKS.md` + `memory/` mínima (`active-context.md`, `stack.md`). Backbone automático/invisível.
+- **Nível 1:** + `ARCHITECTURE.md`, `memory/vision.md`. Backbone simples explícito.
+- **Nível 2:** `docs/` (`requirements`, `architecture`), `tasks/backlog.md`, `tests/`, CI básico, `memory/architecture.md` (segmentação começa).
+- **Nível 3:** `docs/` (+ `business-rules`, `security` se R≥40, `decisions`), `memory/` segmentada completa (`decisions/`, `archive/`), `tests/` completo, snapshots periódicos. Agents conforme a stack.
 - **Nível 4:** + `agents/`, `workflows/`, `security/`, `audits/`, `metrics/`, `governance/`. Time completo de agents + coordinator. Snapshots automáticos.
 
 **Decida a stack** (a Aliança não embute catálogo de ferramentas — você já conhece as opções):
@@ -146,7 +148,7 @@ Para **P0**, traduza isso para linguagem humana (ver `persona-p0`): "Vou montar 
 Após o "sim":
 
 1. Crie a estrutura do nível.
-2. Escreva `memory/vision.md` (o quê, persona, problema, usuários) e `memory/active-context.md` (estado inicial, próximos passos).
+2. Escreva `memory/active-context.md` (estado inicial, próximos passos) — **sempre**. A partir do Nível 1, escreva também `memory/vision.md` (o quê, persona, problema, usuários).
 3. Gere o **snapshot inicial** em `snapshots/snapshot-AAAA-MM-DD-setup.md`.
 4. Gere **`memory/stack.md`** — o molde abaixo, preenchido para **este** projeto. É a ponte entre o backbone abstrato e os comandos reais; as instruções `testing` e `code-quality` leem este arquivo para saber qual comando rodar. Configure/instale as ferramentas que você listou nele.
 5. Configure higiene mínima: `.gitignore` + `.env.example` (nível ≥ 1).

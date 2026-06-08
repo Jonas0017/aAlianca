@@ -149,13 +149,13 @@ Ajuste de risco        = se R ≥ 40, sobe +1 nível (cap 4) E adiciona módulos
 > Em **todos** os níveis, o Backbone de Qualidade (§6) está presente — só muda a profundidade.
 
 - **Nível 0 — Mínimo**
-  `README.md`, `TASKS.md`. Backbone em modo "automático invisível" (testes e lint configurados, rodando sem o usuário gerenciar). Ideal para P0/landing/script.
+  `README.md`, `TASKS.md` + memória mínima (`memory/active-context.md`, `memory/stack.md`). Backbone em modo "automático invisível" (testes e lint configurados, rodando sem o usuário gerenciar). Ideal para P0/landing/script.
 
 - **Nível 1 — Leve**
-  `README.md`, `TASKS.md`, `ARCHITECTURE.md`. Backbone explícito mas simples.
+  `README.md`, `TASKS.md`, `ARCHITECTURE.md` + `memory/vision.md`. Backbone explícito mas simples.
 
 - **Nível 2 — Estruturado**
-  `/docs` (`requirements.md`, `architecture.md`), `/tasks` (`backlog.md`), `/tests`. Backbone com CI básico.
+  `/docs` (`requirements.md`, `architecture.md`), `/tasks` (`backlog.md`), `/tests`, `memory/` segmentada começa (`architecture.md`). Backbone com CI básico.
 
 - **Nível 3 — Robusto**
   `/docs` (`requirements`, `architecture`, `business-rules`, `security`, `decisions`), `/tasks`, `/tests`, `/memory` segmentada. Backbone com pipeline completo. Multiagente opcional.
@@ -243,7 +243,7 @@ Isso é o que te dá "buscar cada coisa no momento exato" sem inchar o contexto.
 
 ## 8. Camada 7 — Memória Segmentada
 
-Proibido `memory.md` gigante (regra mantida da v1). Estrutura mínima a partir do Nível 3:
+Proibido `memory.md` gigante (regra mantida da v1). Uma **memória mínima** (`active-context.md` + `stack.md`) existe desde o **Nível 0** — é o que torna o projeto retomável (§2/`START-HERE`). A estrutura **segmentada** abaixo cresce a partir do Nível 2-3:
 
 ```
 /memory
