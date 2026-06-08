@@ -14,6 +14,7 @@ A Aliança **não** traz catálogo de padrões — você (LLM) já conhece camad
 - **Dependa para dentro.** O detalhe (UI, banco, framework, API externa) depende da regra de negócio — nunca o contrário. A regra não conhece o detalhe.
 - **Fronteira segue responsabilidade.** Um módulo = uma razão para mudar. Se duas partes mudam por motivos diferentes, separe (casa com o eixo **Estrutura** do `setup`).
 - **A estrutura mais simples que cabe no nível.** Não introduza camada, abstração ou serviço antes da dor existir. Sobre-arquitetar é dívida tão cara quanto não arquitetar — sobretudo em P0 / níveis baixos.
+- **Reaproveite antes de construir.** Prefira capacidade pronta (biblioteca, skill, serviço/MCP) a reimplementar — sobretudo em superfícies comuns (auth, pagamentos, parsing, integrações). Avalie a dependência antes de adotar (ver `security`).
 - **Acoplamento baixo, coesão alta.** O que muda junto fica junto; o que é independente não se enrosca.
 - **Um sentido de fluxo.** Evite dependência circular entre módulos.
 

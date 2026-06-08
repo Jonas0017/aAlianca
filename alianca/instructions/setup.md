@@ -125,6 +125,7 @@ Este nível é uma **estimativa de partida**, não um veredito. O questionário 
 
 - **P2/P3** informam a stack; você **respeita** a escolha e só valida lacunas (runner de teste? lint? CI?).
 - **P0/P1** → você **escolhe e justifica em uma frase simples** ("vou usar X porque é o jeito mais rápido e seguro de colocar isso no ar"). Defaults seguros e convencionais, não o mais sofisticado.
+- **Considere capacidades prontas** (skill, serviço, MCP, biblioteca), não só linguagem/framework — uma delas pode resolver uma necessidade inteira (auth, pagamentos, busca). Reaproveitar > construir.
 
 A escolha não vira arquivo na Aliança — ela é **registrada no projeto do usuário** em `memory/stack.md` (Passo 7), que amarra o backbone abstrato aos comandos concretos **daquele** projeto.
 

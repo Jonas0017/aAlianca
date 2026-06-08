@@ -46,6 +46,7 @@ Um **harness adaptativo**: estrutura + instruções que se moldam ao **projeto**
 ## 5. Invariantes (valem sempre, em todos os níveis)
 
 - **Backbone inegociável:** testes, qualidade de código, refatoração e prevenção de bugs estão **sempre** presentes — só a profundidade varia por nível.
+- **Use o que já existe:** antes de construir algo não-trivial, veja se há pronto — skill, ferramenta, biblioteca ou serviço (MCP) que resolva. Reaproveitar > reinventar; construa do zero só quando nada serve. Dependência externa entra com higiene (proveniência, licença, scan — ver `security`).
 - **Definition of Done:** uma tarefa só fecha com **testes passando, lint limpo e docs/memória atualizados**.
 - **Anti-alucinação:** nunca declare algo pronto sem rodar/observar; **cite `arquivo:linha`** ao afirmar fatos sobre o código.
 - **Estado vive em disco:** o que importa fica em `memory/` e `snapshots/`, nunca só na janela de contexto. Não tente administrar % de contexto — garanta recuperabilidade.
