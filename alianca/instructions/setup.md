@@ -152,9 +152,23 @@ Após o "sim":
 3. Gere o **snapshot inicial** em `snapshots/snapshot-AAAA-MM-DD-setup.md`.
 4. Gere **`memory/stack.md`** — o molde abaixo, preenchido para **este** projeto. É a ponte entre o backbone abstrato e os comandos reais; as instruções `testing` e `code-quality` leem este arquivo para saber qual comando rodar. Configure/instale as ferramentas que você listou nele.
 5. Configure higiene mínima: `.gitignore` + `.env.example` (nível ≥ 1).
-6. Atualize o `router.md` se alguma instrução passou a ser relevante para este projeto.
+6. Configure o **controle de versão** conforme o nível (tabela abaixo).
+7. Atualize o `router.md` se alguma instrução passou a ser relevante para este projeto.
 
 A partir daqui, siga o **loop de operação** do `START-HERE.md`.
+
+### Controle de versão por nível
+
+Genérico — vale para qualquer sistema de versionamento (a ferramenta concreta vem do `stack.md`):
+
+| Nível | Convenção |
+|---|---|
+| 0 | versionar é opcional; se houver, um repositório só, commits simples. |
+| 1+ | inicializar o repositório no bootstrap; `.gitignore` da stack; **commits pequenos e descritivos** (um assunto por commit). |
+| 2+ | mensagem de commit padronizada (ex.: tipo + resumo); commit não quebra o build (lint+test verdes). |
+| 3+ | estratégia de branches (trabalho fora da branch principal, integração via PR/revisão). |
+
+Invariante: **nunca commitar segredo** (ver `security`); refatoração e mudança de comportamento em commits separados (ver `refactor`).
 
 ---
 

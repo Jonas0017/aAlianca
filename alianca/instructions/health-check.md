@@ -20,6 +20,7 @@ Verifica se o harness está íntegro e coerente com o projeto real. Rode periodi
 - [ ] Algum arquivo de `memory/` está grande/duplicado demais? → consolidar/dividir.
 - [ ] `active-context.md` reflete o estado real (não está defasado)?
 - [ ] Há um `snapshot` recente o suficiente para retomar?
+- [ ] `memory/feedback.md` capturou os erros recorrentes? Há padrão novo a registrar, ou regra obsoleta a arquivar?
 
 **Coerência de nível**
 - [ ] O nível declarado bate com os eixos reais hoje? → se não, dispare `migration`.

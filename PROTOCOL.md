@@ -188,6 +188,7 @@ Rebaixar (simplificar) quando a complexidade real cai e a estrutura está ociosa
 | **Qualidade de código** | formatter + linter com defaults | regras de projeto, pre-commit | + gates de PR, análise estática, complexidade ciclomática |
 | **Refatoração** | gatilho: "duplicou 3x → extraia" | revisão de débito por marco | orçamento de débito técnico rastreado em `/metrics` |
 | **Prevenção de bugs** | tipos quando a stack permite, guard clauses | code review obrigatório, contratos | + property-based tests, fuzzing onde aplicável |
+| **Arquitetura** | estrutura plana e óbvia, sem camadas cerimoniais | fronteiras de módulo explícitas, ADRs em `decisions/` | arquitetura governada, revisão por marco |
 
 Cada pilar é um **módulo just-in-time** (§7): a instrução completa só é carregada quando o gatilho ocorre (ex.: o módulo de refatoração só entra no contexto quando o agente detecta duplicação).
 
@@ -247,11 +248,13 @@ Proibido `memory.md` gigante (regra mantida da v1). Uma **memória mínima** (`a
 
 ```
 /memory
+  active-context.md    # estado de trabalho corrente (desde o Nível 0)
+  stack.md             # ferramentas e comandos do projeto (desde o Nível 0)
   vision.md
+  feedback.md          # aprendizado: erro recorrente → regra (sob demanda)
   architecture.md
   business-rules.md
   security.md          # se R ≥ 40
-  active-context.md    # estado de trabalho corrente
   /decisions           # um arquivo por decisão (ADR-style)
   /archive             # conhecimento obsoleto, preservado
 ```
@@ -384,20 +387,20 @@ Ideias que não estavam no escopo original mas que, na minha avaliação, são o
 - **A1. Versionamento + migração da Aliança.** Todo projeto gravado registra `alianca-version` no `router.md`. Quando a Aliança evolui, existe um caminho de migração ("este projeto usa Aliança 2.0 → migrar para 2.1") em vez de quebrar projetos antigos. Sem isso, "a base de todos os devs do mundo" vira incompatível consigo mesma na primeira atualização.
 - **A2. health-check (autovalidação).** Um check que o agente roda periodicamente: o `router.md` aponta para módulos que existem? Há memória duplicada ou inchada? Algum doc passou do tamanho saudável? Testes estão verdes? O nível declarado bate com os eixos reais? Retorna um relatório de saúde acionável.
 - **A3. Precedência entre módulos.** Quando dois gatilhos disparam ao mesmo tempo e as instruções conflitam, o roteador precisa de uma ordem de prioridade declarada (ex.: `security` > `refactor` > `style`). Sem isso, comportamento vira não-determinístico.
-- **A4. Recuperação de desastre.** Procedimento explícito: se a memória corromper ou uma sessão sair dos trilhos, como reconstruir o estado a partir do último snapshot + `/decisions`. Snapshot não serve de nada se ninguém sabe restaurar a partir dele.
+- **A4. Recuperação de desastre.** ✅ *Implementado* no `snapshot` (seção "Recuperação de desastre"): reconstruir o estado a partir do último snapshot + `memory/decisions/` + código/histórico, validar com `health-check`. Snapshot não serve de nada se ninguém sabe restaurar a partir dele.
 
 ### B. Concretude (tirar do abstrato)
 
 - **B1. Stack registrada por projeto (não "stack packs").** O backbone (testes/qualidade/refac) é abstrato até ser amarrado a comandos concretos — mas esse vínculo **não** se faz com catálogos pré-escritos na Aliança. Sugerir ferramenta é trabalho da **LLM**: qualquer modelo já sabe "site → framework web, API → framework backend", e um `.md` congelado seria redundante, inflaria o contexto (viola o Princípio 4) e apodreceria a cada release de ferramenta. O que **é** do harness: garantir que a LLM (a) **decida** a stack no `setup` (P0/P1 → ela escolhe e justifica simples; P2/P3 → respeita a do dev) e (b) **registre** a escolha em `memory/stack.md` — fonte da verdade, por projeto, que `testing`/`code-quality` leem. Assim o estado vive em disco (Princípio 5), sobrevive a troca de sessão/modelo, e cada projeto recebe ferramentas sob medida sem a Aliança carregar enciclopédia alguma.
 - **B2. Definition of Done por tarefa.** Toda tarefa em `TASKS.md` carrega um contrato de conclusão amarrado ao backbone: testes passam, lint limpo, docs/memória atualizados. Fecha a porta para "terminei" sem verificação — a causa nº1 de falsa sensação de progresso.
 - **B3. Separação de ambientes** (dev/stage/prod) e gestão de variáveis/segredos a partir do Nível 2.
-- **B4. Convenções de controle de versão por nível.** Nível 0: git opcional. Nível 1+: git init no bootstrap, `.gitignore` adequado à stack, convenção de commits; Nível 3+: estratégia de branches.
+- **B4. Convenções de controle de versão por nível.** ✅ *Implementado* no `setup` (Passo 7): Nível 0 git opcional; Nível 1+ repositório no bootstrap, `.gitignore` da stack, commits pequenos e descritivos; Nível 2+ mensagem padronizada e commit que não quebra o build; Nível 3+ estratégia de branches.
 
 ### C. Confiabilidade do agente (anti-alucinação)
 
 - **C1. Rituais de verificação.** Regra dura no backbone: nunca declarar algo pronto sem executar/observar; citar o arquivo/linha ao afirmar fatos sobre o código; rodar teste antes de marcar tarefa concluída.
 - **C2. Ponto de entrada único (`START-HERE.md`).** Um arquivo que *qualquer* LLM ou humano lê primeiro e se orienta sozinho: o que é o projeto, persona, nível, onde está a memória, onde está o router, qual o próximo passo. Essencial para algo model-agnostic e multi-sessão — é o que permite trocar de ferramenta/modelo sem perder o fio.
-- **C3. Loop de feedback / aprendizado por projeto.** Erros recorrentes do agente naquele projeto viram entradas de memória de feedback ("aqui sempre erramos X; faça Y"). O harness melhora ao longo do projeto, não só entre projetos.
+- **C3. Loop de feedback / aprendizado por projeto.** ✅ *Implementado:* erros recorrentes viram regras em `memory/feedback.md` ("aqui sempre erramos X; faça Y"), consultadas pelo `code-quality` e revisadas pelo `health-check`. O harness melhora ao longo do projeto, não só entre projetos.
 
 ### D. Saúde e observabilidade
 

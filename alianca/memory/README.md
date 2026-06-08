@@ -11,11 +11,22 @@ A **memória mínima** (`active-context.md` + `stack.md`) existe desde o **Níve
 | `active-context.md` | estado de trabalho corrente (o que está em andamento) | 0 |
 | `stack.md` | ferramentas e comandos concretos do projeto (runner, lint, CI…) — gerado pelo `setup`; o backbone lê daqui | 0 |
 | `vision.md` | o que é o projeto, persona, problema, usuários | 1 |
+| `feedback.md` | aprendizado do projeto: erro recorrente → regra ("aqui sempre erramos X → faça Y") | qualquer (sob demanda) |
 | `architecture.md` | arquitetura vigente | 2 |
 | `business-rules.md` | regras de negócio | 3 |
 | `security.md` | postura de segurança | se R ≥ 40 |
 | `decisions/` | uma decisão por arquivo (estilo ADR) | 3 |
 | `archive/` | conhecimento obsoleto, preservado (nunca apagado) | 3 |
+
+## feedback.md — o harness aprende com o próprio projeto
+
+Quando um erro **se repete** neste projeto (o agente erra a mesma coisa duas vezes, ou o usuário corrige o mesmo ponto), registre a lição como uma regra curta e acionável — não o episódio. O `code-quality` e o `health-check` consultam este arquivo para não repetir o erro. Formato:
+
+```
+- [AAAA-MM-DD] Sintoma recorrente: <o que deu errado>. Regra: <o que fazer a partir de agora>.
+```
+
+Mantenha enxuto: regra que virou hábito ou ficou obsoleta migra para `archive/`. É genérico por natureza — serve a qualquer stack, persona ou nível.
 
 > Em ferramentas com memória nativa (ex.: Claude Code), mapeie para ela em vez de duplicar.
 > Vazio nesta Fase 1 — `active-context.md` é criado pelo `setup`, no bootstrap de um projeto real.

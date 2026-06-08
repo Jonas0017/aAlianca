@@ -33,6 +33,7 @@ Código é lido muito mais vezes do que escrito. Otimize para o próximo humano 
 - [ ] Sem segredo hardcoded (ver `security`).
 - [ ] Testes verdes (ver `testing`).
 - [ ] Docs/memória atualizados se o comportamento mudou.
+- [ ] Consultei `memory/feedback.md` — não repeti um erro já registrado. Se errei algo **de novo**, adicionei a regra lá.
 
 ## Para P0 (leigo)
 

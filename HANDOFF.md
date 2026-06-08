@@ -24,9 +24,9 @@ harness ai/
 ├─ HANDOFF.md             ← este arquivo
 └─ alianca/               ← implementação de referência
    ├─ START-HERE.md       ← ponto de entrada do LLM
-   ├─ router.md           ← índice de 11 instruções + gatilhos + precedência
-   ├─ instructions/       ← TODAS as 11 prontas ✅
-   │   setup · deep-questions · persona-p0 · testing · code-quality ·
+   ├─ router.md           ← índice de 12 instruções + gatilhos + precedência
+   ├─ instructions/       ← TODAS as 12 prontas ✅
+   │   setup · deep-questions · persona-p0 · testing · code-quality · architecture ·
    │   refactor · bug-prevention · security · snapshot · migration · health-check
    ├─ memory/README.md    ← documenta vision, active-context, stack.md, decisions…
    └─ snapshots/README.md
@@ -41,7 +41,8 @@ harness ai/
 - ✅ **Fase 3** — backbone (`testing`, `code-quality`, `refactor`, `bug-prevention`, `security`) + `persona-p0`.
 - ✅ **Fase 3b** — instruções de sistema (`snapshot`, `migration`, `health-check`).
 - ✅ **Fase 4 (revisada → 2.1)** — em vez de "stack packs", a escolha de stack virou responsabilidade da LLM no `setup`, registrada por projeto em `memory/stack.md`. Pasta `stacks/` removida; backbone (`testing`, `code-quality`) re-apontado.
-- **Aliança está conceitualmente fechada** — as 11 instruções existem e estão registradas no router.
+- ✅ **Revisão de arquitetura (2.1)** — após varredura completa: corrigida a memória mínima por nível (Fix #1); removido token `style` órfão (Fix #3); adicionado **módulo `architecture`** (12ª instrução, invariantes de estrutura, sem catálogo); **loop de feedback** (`memory/feedback.md`); **convenções de versionamento** por nível (setup); **recuperação de desastre** (snapshot). Pendência deliberada: calibrar o gatilho `R≥40` (ex.: "login sozinho" = 25) no dogfood.
+- **Aliança está conceitualmente fechada** — as 12 instruções existem e estão registradas no router.
 
 ## Próximos passos (em ordem)
 

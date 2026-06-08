@@ -17,10 +17,10 @@ alianca-version: 2.1
 ## Ordem de precedência (quando gatilhos conflitam)
 
 ```
-security  >  bug-prevention  >  testing  >  refactor  >  code-quality  >  style
+security  >  bug-prevention  >  testing  >  architecture  >  refactor  >  code-quality
 ```
 
-A segurança nunca é sacrificada por estilo ou velocidade.
+A segurança nunca é sacrificada por estilo ou velocidade. (Estilo/formatação não é um módulo à parte — é o piso do `code-quality`.)
 
 ---
 
@@ -33,6 +33,7 @@ A segurança nunca é sacrificada por estilo ou velocidade.
 | `deep-questions` | a triagem do setup indicou algum eixo ≥ 2 | bootstrap | níveis ≥ 2 | ✅ pronto |
 | `testing` | criar ou alterar lógica testável | execução | todos | ✅ pronto |
 | `code-quality` | antes de commit / ao abrir PR | review | todos | ✅ pronto |
+| `architecture` | criar/alterar estrutura: novo módulo, camada, fronteira ou dependência | execução | todos | ✅ pronto |
 | `refactor` | detectar duplicação (3x) ou função longa demais | execução | todos | ✅ pronto |
 | `bug-prevention` | escrever código com risco de erro (entrada externa, estado, concorrência) | execução | todos | ✅ pronto |
 | `security` | tocar em auth, dados pessoais, pagamentos ou segredos | execução | R ≥ 40 | ✅ pronto |

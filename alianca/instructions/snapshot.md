@@ -50,3 +50,15 @@ Um snapshot é um documento **autocontido** que permite outra sessão (outro mod
 ## Handoff de contexto
 
 Quando a sessão estiver pesada: gere o snapshot, salve o essencial na memória e diga ao usuário, em uma linha, **como continuar numa nova sessão** ("abra uma nova conversa e diga: continue a partir do snapshot mais recente").
+
+## Recuperação de desastre
+
+Se a memória corromper, a sessão sair dos trilhos, ou você chegar a um projeto sem saber o estado, **reconstrua** — não adivinhe:
+
+1. Leia o **snapshot mais recente** em `snapshots/` (fonte de verdade do estado).
+2. Cruze com `memory/decisions/` (o porquê das escolhas) e `memory/active-context.md` (o que estava em andamento).
+3. Confirme o estado real **contra o código e o histórico de versão** — não confie só na memória; o que a memória diz e o repositório contradiz, o repositório vence (e você corrige a memória).
+4. Rode o `health-check` para validar integridade antes de retomar.
+5. Registre o que reconstruiu em `active-context.md` e gere um novo snapshot.
+
+Princípio: o estado essencial vive em disco e é **redundante** (snapshot + decisions + código). Qualquer uma das fontes sozinha já permite recomeçar.

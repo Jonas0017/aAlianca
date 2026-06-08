@@ -51,6 +51,7 @@ Um **harness adaptativo**: estrutura + instruções que se moldam ao **projeto**
 - **Estado vive em disco:** o que importa fica em `memory/` e `snapshots/`, nunca só na janela de contexto. Não tente administrar % de contexto — garanta recuperabilidade.
 - **Segredos:** nunca commitar credencial; `.gitignore` + `.env.example` desde o início.
 - **Persona P0 (leigo):** linguagem humana, zero jargão. Entregue a ele "o que foi feito / o que falta / o que preciso de você".
+- **O harness aprende:** erro que se repete neste projeto vira regra em `memory/feedback.md` — não erre a mesma coisa duas vezes.
 
 ---
 
