@@ -105,14 +105,16 @@ Risco é o eixo dominante: `R ≥ 40` força `memory/security.md` e a instruçã
 
 ## Passo 5 — O que cada Nível gera
 
+> **Esta é a fonte operacional do mapa Nível→artefatos.** PROTOCOL §5 e `memory/README` espelham; ao mudar o que um nível gera, atualize **aqui primeiro**.
+
 > O **backbone** (testes, qualidade, refatoração, prevenção de bugs) existe em **todos** os níveis — só muda a profundidade.
 
 > **Memória mínima existe desde o Nível 0:** `memory/active-context.md` (estado para retomar) e `memory/stack.md` (ferramentas). É o que o `START-HERE.md §2` usa para detectar "projeto em andamento". A memória **segmentada** (architecture, business-rules, decisions, archive) cresce a partir do Nível 2-3.
 
-- **Nível 0:** `README.md`, `TASKS.md` + `memory/` mínima (`active-context.md`, `stack.md`). Backbone automático/invisível.
+- **Nível 0:** `README.md`, `TASKS.md` + `memory/` mínima (`active-context.md`, `stack.md`). Backbone automático/invisível — sem hook/CI; o agente roda testes e lint no passo VERIFICAR de cada turno (`START-HERE` §4).
 - **Nível 1:** + `ARCHITECTURE.md`, `memory/vision.md`. Backbone simples explícito.
 - **Nível 2:** `docs/` (`requirements`, `architecture`), `tasks/backlog.md`, `tests/`, CI básico, `memory/architecture.md` (segmentação começa).
-- **Nível 3:** `docs/` (+ `business-rules`, `security` se R≥40, `decisions`), `memory/` segmentada completa (`decisions/`, `archive/`), `tests/` completo, snapshots periódicos. Agents conforme a stack.
+- **Nível 3:** `docs/` (`requirements`, `architecture`), `memory/` segmentada completa (`business-rules.md`, `security.md` se R≥40, `decisions/`, `archive/`), `tests/` completo, snapshots periódicos. Agents conforme a stack.
 - **Nível 4:** + `agents/`, `workflows/`, `security/`, `audits/`, `metrics/`, `governance/`. Time completo de agents + coordinator. Snapshots automáticos.
 
 **Decida a stack** (a Aliança não embute catálogo de ferramentas — você já conhece as opções):
@@ -141,6 +143,8 @@ Confirma? (sim / ajustar)
 
 Para **P0**, traduza isso para linguagem humana (ver `persona-p0`): "Vou montar X, Y e Z pra você. Pode ser?"
 
+> **Reversível:** criar a estrutura não é irreversível — se depois você não gostar, desfaço e removo o que foi gerado. No Nível 0 (git opcional), rastreie o que criou para poder reverter.
+
 ---
 
 ## Passo 7 — Gerar e registrar
@@ -149,7 +153,7 @@ Após o "sim":
 
 1. Crie a estrutura do nível.
 2. Escreva `memory/active-context.md` (estado inicial, próximos passos) — **sempre**. A partir do Nível 1, escreva também `memory/vision.md` (o quê, persona, problema, usuários).
-3. Gere o **snapshot inicial** em `snapshots/snapshot-AAAA-MM-DD-setup.md`.
+3. **A partir do Nível 1**, gere o snapshot inicial em `snapshots/snapshot-AAAA-MM-DD-setup.md`. No Nível 0 a memória mínima (`active-context.md`) já basta para retomar — ver `START-HERE` §2.
 4. Gere **`memory/stack.md`** — o molde abaixo, preenchido para **este** projeto. É a ponte entre o backbone abstrato e os comandos reais; as instruções `testing` e `code-quality` leem este arquivo para saber qual comando rodar. Configure/instale as ferramentas que você listou nele.
 5. Configure higiene mínima: `.gitignore` + `.env.example` (nível ≥ 1).
 6. Configure o **controle de versão** conforme o nível (tabela abaixo).
@@ -182,14 +186,14 @@ Invariante: **nunca commitar segredo** (ver `security`); refatoração e mudanç
 Stack: <ex.: Next.js (TypeScript)>
 Por quê: <1 frase; para P0, em linguagem de produto>
 
-| Função        | Ferramenta      | Comando            |
-|---------------|-----------------|--------------------|
-| Instalar deps | <ex.: npm>      | <ex.: npm install> |
-| Rodar local   | <…>             | <ex.: npm run dev> |
-| Testes        | <ex.: Vitest>   | <ex.: npm test>    |
-| Lint          | <ex.: ESLint>   | <ex.: npm run lint>|
-| Format        | <ex.: Prettier> | <ex.: npm run fmt> |
-| Build         | <…>             | <ex.: npm run build>|
+| Função        | Ferramenta | Comando |
+|---------------|------------|---------|
+| Instalar deps |            |         |
+| Rodar local   |            |         |
+| Testes        |            |         |
+| Lint          |            |         |
+| Format        |            |         |
+| Build         |            |         |
 
 CI (nível ≥ 2): <onde lint+test rodam no push; ex.: GitHub Actions>
 Higiene: .gitignore e .env.example criados (nível ≥ 1); segredo nunca commitado.
@@ -197,3 +201,24 @@ Atualizado em: <AAAA-MM-DD>
 ```
 
 Se a stack mudar depois, **atualize este arquivo** — ele é a fonte da verdade sobre as ferramentas do projeto.
+
+---
+
+## Molde de `TASKS.md` (Definition of Done por tarefa)
+
+Toda tarefa carrega um **contrato de conclusão** amarrado ao backbone — fecha a porta para "terminei" sem verificação. Criado já no Nível 0.
+
+````
+# TASKS — <projeto>
+
+## A fazer
+- [ ] <tarefa>   ·  DoD: testes verdes · lint limpo · docs/memória atualizados
+
+## Em andamento
+- [ ] <tarefa>   ·  <agente/dono, se houver>
+
+## Concluído
+- [x] <tarefa>   ·  <AAAA-MM-DD>
+````
+
+Uma tarefa só sai de "Em andamento" quando o DoD é satisfeito **de fato** (rodar e observar — ver `testing` e `code-quality`). Para P0, descreva a tarefa em linguagem de produto, sem jargão.

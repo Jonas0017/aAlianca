@@ -40,7 +40,7 @@ O bug mais barato é o que não existe. Previna na escrita, não no debug.
 | 2–3 | **code review obrigatório**; contratos explícitos nas interfaces |
 | 4 | + property-based testing e fuzzing onde aplicável |
 
-## Anti-alucinação (vale sempre)
+## Observabilidade (a partir do Nível 3)
 
-- Não afirme que algo funciona sem **rodar e observar**.
-- Ao descrever o código, **cite `arquivo:linha`** — não invente comportamento.
+- **Logging estruturado** nos pontos de decisão e nas fronteiras do sistema; nunca logue segredo nem dado pessoal (ver `security`).
+- **Rastreio de erro:** capture exceções com contexto suficiente para diagnosticar sem reproduzir. Erro em produção que ninguém observa é bug invisível.

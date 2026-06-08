@@ -33,7 +33,7 @@ A Aliança **não** traz catálogo de padrões — você (LLM) já conhece camad
 | Nível | Estrutura |
 |---|---|
 | 0–1 | uma estrutura óbvia e plana; sem camadas cerimoniais. Decisão anotada em `ARCHITECTURE.md`, se houver. |
-| 2–3 | fronteiras de módulo explícitas; `docs/architecture.md` + ADRs em `memory/decisions/`. |
+| 2–3 | fronteiras de módulo explícitas; `docs/architecture.md`; ADRs em `memory/decisions/` (a partir do nível 3). |
 | 4 | arquitetura governada; revisão por marco; agente **Architect** (ver PROTOCOL §11). |
 
 ## Para P0 (leigo)

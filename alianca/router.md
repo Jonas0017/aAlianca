@@ -22,6 +22,8 @@ security  >  bug-prevention  >  testing  >  architecture  >  refactor  >  code-q
 
 A segurança nunca é sacrificada por estilo ou velocidade. (Estilo/formatação não é um módulo à parte — é o piso do `code-quality`.)
 
+> Os módulos de ciclo de vida (`snapshot`, `migration`, `health-check`, `agents`) ficam **fora** desta ordem — coordenam o trabalho, não competem com os módulos de código.
+
 ---
 
 ## Instruções
@@ -40,6 +42,7 @@ A segurança nunca é sacrificada por estilo ou velocidade. (Estilo/formatação
 | `snapshot` | antes de tarefa grande, ou ao concluir um marco | execução | níveis ≥ 1 | ✅ pronto |
 | `migration` | sinais de crescimento/encolhimento cruzam um gatilho (PROTOCOL §5) | evolução | todos | ✅ pronto |
 | `health-check` | revisar a saúde do harness (periódico) | review | níveis ≥ 2 | ✅ pronto |
+| `agents` | dividir trabalho entre especialistas: nível ≥ 3, frentes paralelas independentes, ou revisão independente | execução | níveis ≥ 2 | ✅ pronto |
 
 > **Legenda:** ✅ pronto · ⏳ planejado. Ao criar uma instrução, troque o status e confira que o caminho `instructions/<arquivo>.md` existe (o `health-check` valida isso).
 

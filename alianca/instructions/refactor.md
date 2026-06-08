@@ -2,7 +2,7 @@
 trigger: detectar duplicação (3x), função longa demais, ou módulo com responsabilidades misturadas
 load-when: execução
 applies-to: todos os níveis
-priority: refactor (abaixo de bug-prevention, acima de code-quality)
+priority: refactor — 5ª na ordem do router (abaixo de architecture, acima de code-quality)
 ---
 
 # refactor — refatoração contínua

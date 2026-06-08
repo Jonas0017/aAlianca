@@ -24,10 +24,10 @@ harness ai/
 ├─ HANDOFF.md             ← este arquivo
 └─ alianca/               ← implementação de referência
    ├─ START-HERE.md       ← ponto de entrada do LLM
-   ├─ router.md           ← índice de 12 instruções + gatilhos + precedência
-   ├─ instructions/       ← TODAS as 12 prontas ✅
+   ├─ router.md           ← índice de 13 instruções + gatilhos + precedência
+   ├─ instructions/       ← TODAS as 13 prontas ✅
    │   setup · deep-questions · persona-p0 · testing · code-quality · architecture ·
-   │   refactor · bug-prevention · security · snapshot · migration · health-check
+   │   refactor · bug-prevention · security · snapshot · migration · health-check · agents
    ├─ memory/README.md    ← documenta vision, active-context, stack.md, decisions…
    └─ snapshots/README.md
 ```
@@ -42,7 +42,9 @@ harness ai/
 - ✅ **Fase 3b** — instruções de sistema (`snapshot`, `migration`, `health-check`).
 - ✅ **Fase 4 (revisada → 2.1)** — em vez de "stack packs", a escolha de stack virou responsabilidade da LLM no `setup`, registrada por projeto em `memory/stack.md`. Pasta `stacks/` removida; backbone (`testing`, `code-quality`) re-apontado.
 - ✅ **Revisão de arquitetura (2.1)** — após varredura completa: corrigida a memória mínima por nível (Fix #1); removido token `style` órfão (Fix #3); adicionado **módulo `architecture`** (12ª instrução, invariantes de estrutura, sem catálogo); **loop de feedback** (`memory/feedback.md`); **convenções de versionamento** por nível (setup); **recuperação de desastre** (snapshot). Pendência deliberada: calibrar o gatilho `R≥40` (ex.: "login sozinho" = 25) no dogfood.
-- **Aliança está conceitualmente fechada** — as 12 instruções existem e estão registradas no router.
+- **Aliança está conceitualmente fechada** — as 13 instruções existem e estão registradas no router.
+- ✅ **Auto-revisão (2026-06-08)** — corrigida coerência (token `style` órfão, snapshot só a partir do Nível 1, headers de precedência alinhados ao router); completude entregue (B3 separação de ambientes, D3 observabilidade, migração de versão da Aliança, DoD por tarefa via `TASKS.md`, §15 com status); e o **módulo novo `agents`** (quando usar múltiplos agentes). As regras de operação da memória (quando quebrar/consolidar/arquivar) ficaram consolidadas em `memory/README.md` — sem módulo separado, para não colidir com a pasta `memory/`. Pendência deliberada mantida: calibrar o gatilho `R≥40` no dogfood (login=25, pagamentos=30 e regulado=35 ficam abaixo do limiar).
+- ✅ **Passe "menos é mais" (2026-06-08)** — sob a régua *arquiteto, não construtor*: enxugado `security` (catálogo OWASP → invariantes), removida a tabela duplicada em `agents` (vira ponteiro p/ §11) e a anti-alucinação repetida em `bug-prevention`; molde de `stack.md` sem viés de ferramenta; `deep-questions` (Risco) sem cardápio de siglas; `snapshots/README` virou ponteiro p/ a instrução. Coerência: `coordinator` unificado (§11), `business-rules`/`security`/`decisions` movidos de `docs/` para `memory/` (Nível 3), gatilho de migração 2→3 corrigido (memória mínima já tem 2 docs), reversibilidade do bootstrap explícita (P0/F2), Nível 0 "invisível" honesto (roda no VERIFICAR).
 
 ## Próximos passos (em ordem)
 

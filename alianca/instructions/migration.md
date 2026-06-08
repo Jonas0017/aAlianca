@@ -15,7 +15,7 @@ O harness é um sistema vivo. Quando o projeto cresce, a estrutura sobe de níve
 |---|---|
 | 0 → 1 | > 1 arquivo com lógica não-trivial, ou expectativa de retomada futura |
 | 1 → 2 | ≥ 3 módulos, ou ≥ 2 devs, ou primeira integração externa |
-| 2 → 3 | ≥ 6 módulos, ou dados pessoais/auth introduzidos, ou memória > 1 documento |
+| 2 → 3 | ≥ 6 módulos, ou dados pessoais/auth introduzidos, ou memória segmentada além da mínima (`active-context` + `stack`) |
 | 3 → 4 | múltiplos times, compliance regulatório, ou ≥ 3 agents especializados ativos |
 
 > Risco também promove: se `R` cruzar 40 a qualquer momento, suba +1 nível e ative `security`.
@@ -38,3 +38,14 @@ O harness é um sistema vivo. Quando o projeto cresce, a estrutura sobe de níve
 ## Princípio
 
 Migração é aditiva e reversível por padrão. Conhecimento nunca se perde — ele se move para `archive/`.
+
+## Migração de versão da Aliança (≠ migração de nível)
+
+Subir de **nível** muda a estrutura do *projeto*; atualizar a **versão da Aliança** muda o *harness* em si. São coisas diferentes.
+
+Ao chegar a um projeto cujo `router.md` declara um `alianca-version` **anterior** ao da Aliança atual:
+
+1. Não quebre o projeto. Veja o que mudou entre as versões (changelog no `PROTOCOL` / `HANDOFF`).
+2. Rode o `health-check` para mapear o que está desalinhado com a versão nova.
+3. Aplique o **diff de estrutura** de forma aditiva (novas instruções/pastas); arquive o obsoleto em `memory/archive/` — nunca apague.
+4. Atualize `alianca-version` no `router.md` e registre a migração em `memory/decisions/`.

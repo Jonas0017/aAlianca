@@ -26,7 +26,7 @@ Um **harness adaptativo**: estrutura + instruções que se moldam ao **projeto**
 2. **Classifique a persona** pela pergunta de abertura: P0 (leigo) · P1 (iniciante) · P2 (dev) · P3 (time/org).
 3. **Pontue os 3 eixos** — Estrutura (E), Longevidade (L), Risco (R) — e calcule o **Nível (0–4)**: nível base = faixa de `max(E,L)`; se `R ≥ 40`, sobe +1 nível e força módulos de segurança.
 4. **Mostre a estrutura proposta e confirme (dry-run)** antes de criar arquivos.
-5. **Gere** a estrutura do nível: memória mínima (`memory/active-context.md` + `memory/stack.md`; `vision.md` a partir do Nível 1) e um **snapshot inicial** em `snapshots/`.
+5. **Gere** a estrutura do nível: memória mínima (`memory/active-context.md` + `memory/stack.md`; `vision.md` a partir do Nível 1) e, **a partir do Nível 1**, um snapshot inicial em `snapshots/`.
 
 ---
 
@@ -49,7 +49,7 @@ Um **harness adaptativo**: estrutura + instruções que se moldam ao **projeto**
 - **Definition of Done:** uma tarefa só fecha com **testes passando, lint limpo e docs/memória atualizados**.
 - **Anti-alucinação:** nunca declare algo pronto sem rodar/observar; **cite `arquivo:linha`** ao afirmar fatos sobre o código.
 - **Estado vive em disco:** o que importa fica em `memory/` e `snapshots/`, nunca só na janela de contexto. Não tente administrar % de contexto — garanta recuperabilidade.
-- **Segredos:** nunca commitar credencial; `.gitignore` + `.env.example` desde o início.
+- **Segredos:** nunca commitar credencial; `.gitignore` + `.env.example` a partir do Nível 1 (quando há repositório).
 - **Persona P0 (leigo):** linguagem humana, zero jargão. Entregue a ele "o que foi feito / o que falta / o que preciso de você".
 - **O harness aprende:** erro que se repete neste projeto vira regra em `memory/feedback.md` — não erre a mesma coisa duas vezes.
 

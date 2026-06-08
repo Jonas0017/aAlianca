@@ -26,12 +26,10 @@ Some os fatores e normalize para 0–100 (limite 100):
 
 ## Se Risco (R) ≥ banda 2 — confirme e detalhe R
 
-Reconfirme os itens da triagem (login, dados pessoais, pagamentos, regulado) e aprofunde:
+Reconfirme os itens da triagem (login, dados pessoais, pagamentos, regulado) e aprofunde só o que **move a decisão**:
 
-- **Autenticação:** própria ou provedor (OAuth/SSO)? Há papéis/permissões (RBAC)?
-- **Dados pessoais:** que categorias? Há dado sensível especial (saúde, biometria)? LGPD/GDPR aplicável?
-- **Pagamentos:** processa cartão direto (PCI) ou via gateway?
-- **Regulação:** qual norma específica (HIPAA, PCI-DSS, BACEN, etc.)?
+- **Que categorias de dado sensível** entram (pessoal, financeiro, saúde, credencial)?
+- **Há norma regulatória específica** aplicável? Qual?
 
 > Mantenha a pontuação R da triagem (soma dos fatores, limite 100). Estas respostas alimentam `memory/security.md` e o conteúdo da instrução `security`.
 

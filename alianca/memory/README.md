@@ -4,6 +4,8 @@ A **memória segmentada** da Aliança. Proibido um arquivo gigante único — a 
 
 A **memória mínima** (`active-context.md` + `stack.md`) existe desde o **Nível 0** — é o que permite retomar o projeto (ver `START-HERE.md §2`). A segmentação (architecture, business-rules, decisions, archive) cresce com o nível.
 
+> Este README descreve a **estrutura** e a **operação** da memória; o mapa completo Nível→artefatos é o do `setup` (Passo 5). Os momentos de mexer na memória são disparados pelo `health-check` (audita tamanho/duplicação) e pelo `snapshot`/marco (consolida).
+
 ## Estrutura
 
 | Arquivo/pasta | Conteúdo | A partir do nível |
@@ -17,6 +19,14 @@ A **memória mínima** (`active-context.md` + `stack.md`) existe desde o **Níve
 | `security.md` | postura de segurança | se R ≥ 40 |
 | `decisions/` | uma decisão por arquivo (estilo ADR) | 3 |
 | `archive/` | conhecimento obsoleto, preservado (nunca apagado) | 3 |
+
+## Operação — quando mexer na memória
+
+A memória é tratada como código: dividida quando cresce, consolidada nos marcos, nunca apagada. Um `memory.md` gigante é proibido — apodrece e ninguém relê.
+
+- **Quebrar um documento:** passou de um tamanho de leitura confortável (não cabe numa leitura rápida, ou mistura assuntos distintos) → divida por responsabilidade, o mesmo critério da `architecture`.
+- **Consolidar:** ao fechar um marco, funda anotações soltas no documento certo e remova o ruído; duplicação entre arquivos → eleja uma fonte da verdade, as outras apontam para ela.
+- **Arquivar (nunca apagar):** conhecimento obsoleto vai para `archive/`, preservado e fora do caminho. Regra que virou hábito também migra para lá.
 
 ## feedback.md — o harness aprende com o próprio projeto
 

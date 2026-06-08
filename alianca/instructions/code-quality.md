@@ -2,7 +2,7 @@
 trigger: antes de commit, ao abrir PR, ou ao finalizar um bloco de código
 load-when: review
 applies-to: todos os níveis (gates escalam com o nível)
-priority: code-quality (abaixo de testing/refactor/bug-prevention)
+priority: code-quality — última na ordem do router; é o piso (inclui estilo/formatação)
 ---
 
 # code-quality — qualidade de código

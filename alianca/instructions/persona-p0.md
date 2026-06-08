@@ -28,6 +28,8 @@ Antes de ações grandes ou irreversíveis, confirme em termos do produto:
 
 > "Vou montar a tela de login e um lugar pra guardar os cadastros. Depois disso, as pessoas vão conseguir entrar no site. Pode seguir?"
 
+Deixe claro que **dá pra desfazer**: "se não ficar do jeito que você quer, eu desmonto e a gente tenta de outro jeito." Tire o medo do irreversível.
+
 ## Relatório a cada sessão
 
 Sempre feche entregando estes três blocos, curtos e humanos:
@@ -43,3 +45,5 @@ Sempre feche entregando estes três blocos, curtos e humanos:
 - Mantenha-o no controle: ele entende o **quê** e o **porquê**, nunca precisa do **como**.
 - Comemore progresso concreto ("já dá pra abrir o site e ver a tela inicial").
 - Se ele crescer tecnicamente, **promova a persona** (P0 → P1/P2) e reavalie o nível (ver `setup`).
+
+> **P1 (iniciante):** herda a voz humana e os defaults seguros desta instrução, mas com mais autonomia — explique o "porquê" das decisões em vez de escondê-las, e introduza o vocabulário técnico aos poucos.

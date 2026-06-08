@@ -2,7 +2,7 @@
 trigger: criar ou alterar lógica testável (função, regra de negócio, endpoint, componente)
 load-when: execução
 applies-to: todos os níveis (profundidade escala com o nível)
-priority: testing (acima de refactor e code-quality)
+priority: testing — 3ª na ordem do router (abaixo de bug-prevention, acima de architecture)
 ---
 
 # testing — a esteira de testes

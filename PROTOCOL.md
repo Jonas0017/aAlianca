@@ -102,7 +102,7 @@ Três eixos, cada um pontuado **0–100**. **Não se somam num número só** —
 | Nº de módulos/serviços | 1 | 2–3: +15 · 4–6: +30 · 7+: +45 |
 | Camadas presentes (front, back, mobile, infra) | nenhuma além de 1 | +10 por camada adicional (máx +30) |
 | Integrações externas | nenhuma | 1–2: +5 · 3–5: +12 · 6+: +20 |
-| Persistência | nenhuma | simples (arquivo/KV): +2 · relacional: +6 · distribuída: +10 (cap em +5 do total acima, normalize 0–100) |
+| Persistência | nenhuma | simples (arquivo/KV): +2 · relacional: +6 · distribuída: +10 |
 
 ### Eixo L — Longevidade (tempo de vida e evolução)
 
@@ -146,6 +146,8 @@ Ajuste de risco        = se R ≥ 40, sobe +1 nível (cap 4) E adiciona módulos
 
 ### O que cada nível gera
 
+> **Fonte operacional desta tabela:** `alianca/instructions/setup.md` (Passo 5). Ao mudar o que um nível gera, atualize lá primeiro e espelhe aqui.
+
 > Em **todos** os níveis, o Backbone de Qualidade (§6) está presente — só muda a profundidade.
 
 - **Nível 0 — Mínimo**
@@ -158,7 +160,7 @@ Ajuste de risco        = se R ≥ 40, sobe +1 nível (cap 4) E adiciona módulos
   `/docs` (`requirements.md`, `architecture.md`), `/tasks` (`backlog.md`), `/tests`, `memory/` segmentada começa (`architecture.md`). Backbone com CI básico.
 
 - **Nível 3 — Robusto**
-  `/docs` (`requirements`, `architecture`, `business-rules`, `security`, `decisions`), `/tasks`, `/tests`, `/memory` segmentada. Backbone com pipeline completo. Multiagente opcional.
+  `/docs` (`requirements`, `architecture`), `/tasks`, `/tests`, `/memory` segmentada (`business-rules`, `security` se R≥40, `decisions/`, `archive/`). Backbone com pipeline completo. Multiagente opcional.
 
 - **Nível 4 — Plataforma/Org**
   `/docs`, `/memory`, `/agents`, `/workflows`, `/tests`, `/security`, `/audits`, `/metrics`, `/governance`. Multiagente completo. Snapshots periódicos. Governança de conhecimento.
@@ -171,7 +173,7 @@ Promover de nível quando **qualquer** condição cruza:
 |---|---|
 | 0 → 1 | > 1 arquivo de código com lógica não-trivial, ou expectativa de retomada futura |
 | 1 → 2 | ≥ 3 módulos, ou ≥ 2 devs, ou primeira integração externa |
-| 2 → 3 | ≥ 6 módulos, ou dados pessoais/auth introduzidos, ou memória > 1 documento |
+| 2 → 3 | ≥ 6 módulos, ou dados pessoais/auth introduzidos, ou memória segmentada além da mínima (`active-context` + `stack`) |
 | 3 → 4 | múltiplos times, compliance regulatório, ou ≥ 3 agentes especializados ativos |
 
 Rebaixar (simplificar) quando a complexidade real cai e a estrutura está ociosa — a Aliança **arquiva** o excedente, não apaga.
@@ -261,6 +263,8 @@ Proibido `memory.md` gigante (regra mantida da v1). Uma **memória mínima** (`a
 
 **Memória é tratada como código:** versionada, refatorada, dividida quando cresce demais. Em ferramentas com sistema de memória nativo (ex.: Claude Code), a Aliança mapeia para ele em vez de duplicar.
 
+> Operação (quando quebrar, consolidar, arquivar) documentada em `memory/README.md`; os momentos são disparados por `health-check` (audita) e `snapshot`/marco (consolida).
+
 ---
 
 ## 9. Camada 8 — Política de Contexto (reformulada)
@@ -302,12 +306,14 @@ Não é um time fixo de 8. Escala com o nível:
 | 0–1 | Nenhum especializado (um agente faz tudo) |
 | 2 | Opcional: separar QA/Documentação sob demanda |
 | 3 | Architect, Backend, Frontend, QA conforme a stack |
-| 4 | Time completo: Project Manager, Architect, Backend, Frontend, QA, Security, Documentation, DevOps |
+| 4 | Time completo: coordinator, Architect, Backend, Frontend, QA, Security, Documentation, DevOps |
 
 **Regras invariantes (mantidas da v1):**
-- O gerente **coordena**, nunca executa tarefa técnica.
-- O gerente consome **apenas resumos** dos especialistas, nunca histórico completo.
+- O **coordinator** coordena, nunca executa tarefa técnica.
+- O **coordinator** consome **apenas resumos** dos especialistas, nunca histórico completo.
 - *Mapeamento:* em Claude Code, especialistas = subagents (tool Agent); o resumo retornado é o handoff.
+
+> Operacionalizado na instrução `agents` (quando dividir o trabalho e como o coordinator faz o handoff).
 
 ---
 
@@ -382,18 +388,20 @@ Um projeto **sobe de edição** conforme persona/nível evoluem (mesma mecânica
 
 Ideias que não estavam no escopo original mas que, na minha avaliação, são o que separa um "gerador de pastas" de um harness que realmente reduz risco de alucinação, retrabalho e perda de contexto. Agrupadas por objetivo.
 
+> **Status:** ✅ implementado · ⏳ parcial · ✂️ ajustado/descartado. Itens sem marca explícita também já estão refletidos nas instruções.
+
 ### A. Robustez do próprio harness
 
-- **A1. Versionamento + migração da Aliança.** Todo projeto gravado registra `alianca-version` no `router.md`. Quando a Aliança evolui, existe um caminho de migração ("este projeto usa Aliança 2.0 → migrar para 2.1") em vez de quebrar projetos antigos. Sem isso, "a base de todos os devs do mundo" vira incompatível consigo mesma na primeira atualização.
+- **A1. Versionamento + migração da Aliança.** ✅ *Implementado:* `alianca-version` no `router.md` + procedimento de migração de versão na instrução `migration` (aditivo, arquiva o obsoleto, valida com `health-check`). Projetos antigos migram sem quebrar.
 - **A2. health-check (autovalidação).** Um check que o agente roda periodicamente: o `router.md` aponta para módulos que existem? Há memória duplicada ou inchada? Algum doc passou do tamanho saudável? Testes estão verdes? O nível declarado bate com os eixos reais? Retorna um relatório de saúde acionável.
-- **A3. Precedência entre módulos.** Quando dois gatilhos disparam ao mesmo tempo e as instruções conflitam, o roteador precisa de uma ordem de prioridade declarada (ex.: `security` > `refactor` > `style`). Sem isso, comportamento vira não-determinístico.
+- **A3. Precedência entre módulos.** ✅ *Implementado* no `router.md`: ordem declarada `security > bug-prevention > testing > architecture > refactor > code-quality`; os módulos de ciclo de vida ficam fora dela. (Estilo/formatação não é módulo — é o piso do `code-quality`.)
 - **A4. Recuperação de desastre.** ✅ *Implementado* no `snapshot` (seção "Recuperação de desastre"): reconstruir o estado a partir do último snapshot + `memory/decisions/` + código/histórico, validar com `health-check`. Snapshot não serve de nada se ninguém sabe restaurar a partir dele.
 
 ### B. Concretude (tirar do abstrato)
 
 - **B1. Stack registrada por projeto (não "stack packs").** O backbone (testes/qualidade/refac) é abstrato até ser amarrado a comandos concretos — mas esse vínculo **não** se faz com catálogos pré-escritos na Aliança. Sugerir ferramenta é trabalho da **LLM**: qualquer modelo já sabe "site → framework web, API → framework backend", e um `.md` congelado seria redundante, inflaria o contexto (viola o Princípio 4) e apodreceria a cada release de ferramenta. O que **é** do harness: garantir que a LLM (a) **decida** a stack no `setup` (P0/P1 → ela escolhe e justifica simples; P2/P3 → respeita a do dev) e (b) **registre** a escolha em `memory/stack.md` — fonte da verdade, por projeto, que `testing`/`code-quality` leem. Assim o estado vive em disco (Princípio 5), sobrevive a troca de sessão/modelo, e cada projeto recebe ferramentas sob medida sem a Aliança carregar enciclopédia alguma.
-- **B2. Definition of Done por tarefa.** Toda tarefa em `TASKS.md` carrega um contrato de conclusão amarrado ao backbone: testes passam, lint limpo, docs/memória atualizados. Fecha a porta para "terminei" sem verificação — a causa nº1 de falsa sensação de progresso.
-- **B3. Separação de ambientes** (dev/stage/prod) e gestão de variáveis/segredos a partir do Nível 2.
+- **B2. Definition of Done por tarefa.** ✅ *Implementado* no `setup` (molde de `TASKS.md`: cada tarefa carrega um contrato de conclusão — testes verdes, lint limpo, docs/memória atualizados). Fecha a porta para "terminei" sem verificação.
+- **B3. Separação de ambientes.** ✅ *Implementado* no `security` (dev/stage/prod e gestão de segredos por ambiente a partir do Nível 2).
 - **B4. Convenções de controle de versão por nível.** ✅ *Implementado* no `setup` (Passo 7): Nível 0 git opcional; Nível 1+ repositório no bootstrap, `.gitignore` da stack, commits pequenos e descritivos; Nível 2+ mensagem padronizada e commit que não quebra o build; Nível 3+ estratégia de branches.
 
 ### C. Confiabilidade do agente (anti-alucinação)
@@ -405,8 +413,8 @@ Ideias que não estavam no escopo original mas que, na minha avaliação, são o
 ### D. Saúde e observabilidade
 
 - **D1. Health Score do harness.** Métrica composta (recuperabilidade de contexto, frescor da memória, cobertura de teste, defasagem de docs) exibida no health-check. Transforma "saúde do contexto" da v1, que era vaga, em algo medível.
-- **D2. Orçamento de tokens por módulo.** O `router.md` registra o custo aproximado de cada módulo, para o agente priorizar o que carregar quando o contexto estiver apertado.
-- **D3. Observabilidade do produto** (logging estruturado, rastreio de erros) entra no backbone a partir do Nível 3.
+- **D2. Orçamento de contexto por módulo.** ✂️ *Ajustado:* um orçamento numérico por módulo apodreceria e contraria "carregue o mínimo". Em vez de números, o `router.md` prioriza por **precedência** e instrui a carregar uma instrução por vez quando o contexto aperta — custo qualitativo, não tabela de tokens.
+- **D3. Observabilidade do produto.** ✅ *Implementado* no `bug-prevention` (logging estruturado e rastreio de erro a partir do Nível 3).
 
 ### E. Segurança do próprio harness
 
@@ -424,7 +432,7 @@ Ideias que não estavam no escopo original mas que, na minha avaliação, são o
 
 1. ~~Nome definitivo~~ → **resolvido: Aliança**, slogan "o elo que liga os dois mundos" (§14).
 2. **Idioma dos artefatos gerados** — seguir o idioma do usuário, ou fixar PT/EN?
-3. **Formato de entrega da Aliança em si** — skill/plugin, template de repo, ou spec + adapters.
+3. ~~Formato de entrega da Aliança~~ → **resolvido: pasta-referência em `.md` puro** (model-agnostic; adapters por ferramenta no §13).
 4. **Calibração da rubrica** — os pesos do §4 precisam de validação com projetos reais.
 5. **P0 (leigo): até onde automatizar** — o quanto o LLM decide sozinho sem confirmar.
 ```
