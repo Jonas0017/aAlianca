@@ -111,10 +111,11 @@ Um projeto **sobe de edição** conforme a persona e o nível evoluem — sem re
 - **[`alianca/START-HERE.md`](alianca/START-HERE.md)** — comece por aqui (modelo mental + loop de operação).
 - **[`alianca/router.md`](alianca/router.md)** — índice das instruções e ordem de precedência.
 - **[`PROTOCOL.md`](PROTOCOL.md)** — a spec completa; só necessária para evoluir o próprio harness.
+- **[`VALIDATION.md`](VALIDATION.md)** — validação prática: teste A/B (com vs sem harness) em duas LLMs, com método, resultados e os empates assumidos.
 
 ## Status
 
-Versão **2.1** (rascunho, em evolução). As 13 instruções estão prontas e a Aliança está conceitualmente fechada; o calibre fino da rubrica continua se ajustando no uso real, pelo próprio loop adaptativo (estimativa → observa → reajusta). Idioma de trabalho: **PT-BR** (artefatos gerados seguem o idioma do usuário).
+Versão **2.1** (rascunho, em evolução). As 13 instruções estão prontas e a Aliança está conceitualmente fechada; o calibre fino da rubrica continua se ajustando no uso real, pelo próprio loop adaptativo (estimativa → observa → reajusta). **Validada na prática** com um teste A/B em duas LLMs (Claude e Copilot) — ver [`VALIDATION.md`](VALIDATION.md). Idioma de trabalho: **PT-BR** (artefatos gerados seguem o idioma do usuário).
 
 ---
 
