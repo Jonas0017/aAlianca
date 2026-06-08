@@ -13,4 +13,4 @@ Módulos de instrução da Aliança. Cada arquivo `.md` aqui é carregado **sob 
 - ✅ Backbone: `testing` · `code-quality` · `refactor` · `bug-prevention` · `security`
 - ✅ Sistema: `snapshot` · `migration` · `health-check`
 
-**Todas as 11 instruções estão prontas.** A Aliança está conceitualmente fechada — falta materializar stack packs (`../stacks/`) e fazer dogfood.
+**Todas as 11 instruções estão prontas.** A Aliança está conceitualmente fechada. A stack do projeto não vive aqui: a LLM a decide no `setup` e registra em `memory/stack.md`. Próximo passo é o **dogfood** (rodar o `setup` num projeto real e calibrar a rubrica).

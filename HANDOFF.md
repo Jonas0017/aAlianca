@@ -1,4 +1,4 @@
-# Snapshot / Handoff — Projeto Aliança — 2026-06-07
+# Snapshot / Handoff — Projeto Aliança — 2026-06-08
 
 > Ponto de retomada autossuficiente. Abra uma nova sessão e diga: **"continue a partir do HANDOFF.md"**. Tudo que você precisa para continuar está aqui.
 
@@ -11,8 +11,9 @@ Princípios-chave: dimensionamento **multi-eixo** (Estrutura/Longevidade/Risco) 
 ## Decisões travadas
 
 - **Nome do produto:** Aliança. Edições comerciais: Start (P0/P1), Pro (P2), Org (P3).
-- **Nomenclatura simples** (usuário rejeitou nomes poéticos): `START-HERE.md`, `router.md`, `instructions/`, `memory/`, `snapshots/`, `stacks/`; instrução `setup` (bootstrap); `agents`, `coordinator`, `health-check`.
+- **Nomenclatura simples** (usuário rejeitou nomes poéticos): `START-HERE.md`, `router.md`, `instructions/`, `memory/`, `snapshots/`; instrução `setup` (bootstrap); `agents`, `coordinator`, `health-check`.
 - **Formato de entrega:** pasta-referência em `.md` puro (model-agnostic).
+- **Sem `stacks/` (decisão 2.1).** Sugerir ferramentas é trabalho da LLM, não do harness — catálogo `.md` seria redundante, inflaria contexto e apodreceria. A stack é **decidida no `setup`** e **registrada por projeto** em `memory/stack.md` (molde genérico que se adapta ao projeto do dev final). Tudo que a Aliança cria deve ser genérico e adaptável.
 - Idioma de trabalho: PT-BR.
 
 ## Estrutura atual no disco
@@ -27,10 +28,11 @@ harness ai/
    ├─ instructions/       ← TODAS as 11 prontas ✅
    │   setup · deep-questions · persona-p0 · testing · code-quality ·
    │   refactor · bug-prevention · security · snapshot · migration · health-check
-   ├─ memory/README.md
-   ├─ snapshots/README.md
-   └─ stacks/README.md
+   ├─ memory/README.md    ← documenta vision, active-context, stack.md, decisions…
+   └─ snapshots/README.md
 ```
+
+> A **stack não tem pasta**: `memory/stack.md` é gerado por projeto no `setup` (decisão 2.1).
 
 ## Estado (o que está pronto)
 
@@ -38,18 +40,18 @@ harness ai/
 - ✅ **Fase 2** — `setup` (questionário progressivo por persona + rubrica 3 eixos + cálculo de nível) e `deep-questions`.
 - ✅ **Fase 3** — backbone (`testing`, `code-quality`, `refactor`, `bug-prevention`, `security`) + `persona-p0`.
 - ✅ **Fase 3b** — instruções de sistema (`snapshot`, `migration`, `health-check`).
+- ✅ **Fase 4 (revisada → 2.1)** — em vez de "stack packs", a escolha de stack virou responsabilidade da LLM no `setup`, registrada por projeto em `memory/stack.md`. Pasta `stacks/` removida; backbone (`testing`, `code-quality`) re-apontado.
 - **Aliança está conceitualmente fechada** — as 11 instruções existem e estão registradas no router.
 
 ## Próximos passos (em ordem)
 
-1. **Fase 4 — primeira stack pack** em `stacks/` (recomendo `next.md` ou `fastapi.md`): runner de teste, lint/format, CI, `.gitignore`/`.env.example`, comandos concretos. Tira o backbone do abstrato.
-2. **Fase 5 — dogfood:** rodar o `setup` num projeto-exemplo real, ver se a rubrica dá um nível sensato e **calibrar os pesos** (§4 do PROTOCOL).
-3. Pendências menores: validar travessia router→instruções com o `health-check`; decidir 2ª/3ª stack packs.
+1. **Fase 5 — dogfood:** rodar o `setup` num projeto-exemplo real, ver se a rubrica dá um nível sensato, validar a geração de `memory/stack.md` e **calibrar os pesos** (§4 do PROTOCOL).
+2. Pendências menores: validar travessia router→instruções com o `health-check`; conferir que nenhuma instrução ainda referencia `stacks/`.
 
 ## Como retomar
 
 1. Leia este HANDOFF.md.
 2. Leia `alianca/START-HERE.md` e `alianca/router.md` para o modelo mental.
-3. Comece pela Fase 4 (stack pack) — pergunte ao usuário qual stack priorizar se ele não disser.
+3. Comece pela Fase 5 (dogfood): rode o `setup` num projeto-exemplo e observe se a rubrica e o `memory/stack.md` saem coerentes.
 
 > A memória persistente (`MEMORY.md` + `projeto-keel-harness-universal.md` no diretório de memória) também reflete este estado.

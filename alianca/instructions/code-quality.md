@@ -11,7 +11,7 @@ Código é lido muito mais vezes do que escrito. Otimize para o próximo humano 
 
 ## Sempre
 
-- **Formatter + linter** rodando, com a config do `stacks/`. Código formatado antes de commitar.
+- **Formatter + linter** rodando, com os comandos de **`memory/stack.md`**. Código formatado antes de commitar.
 - **Escreva como o código ao redor.** Combine naming, estilo e idiomas do arquivo/projeto — não imponha o seu.
 - **Nomes claros** > comentários. Variáveis e funções dizem o que são.
 - **Funções pequenas, uma responsabilidade.** Se precisa de "e" para descrever o que faz, divida.

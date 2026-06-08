@@ -31,7 +31,7 @@ Teste não é opcional. É o que separa "achei que funciona" de "funciona". A es
 
 ## Convenções
 
-- Estrutura, runner e comandos concretos vêm do **stack pack** (`stacks/`). Siga-os.
+- Runner e comandos concretos vêm de **`memory/stack.md`** (gerado no `setup` para este projeto). Siga-os.
 - Teste isolado e determinístico: sem depender de ordem, rede real ou estado compartilhado (use fakes/fixtures).
 - Um teste que falha deve apontar **claramente** o que quebrou.
 

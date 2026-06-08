@@ -113,7 +113,12 @@ Risco é o eixo dominante: `R ≥ 40` força `memory/security.md` e a instruçã
 - **Nível 3:** `docs/` (+ `business-rules`, `security` se R≥40, `decisions`), `memory/` segmentada, `tests/` completo, snapshots periódicos. Agents conforme a stack.
 - **Nível 4:** + `agents/`, `workflows/`, `security/`, `audits/`, `metrics/`, `governance/`. Time completo de agents + coordinator. Snapshots automáticos.
 
-Escolha o **stack pack** (`stacks/`) pela stack (P2/P3 informam; P0/P1 → você decide e justifica em linguagem simples). Se não houver pacote pronto para a stack, registre como pendência.
+**Decida a stack** (a Aliança não embute catálogo de ferramentas — você já conhece as opções):
+
+- **P2/P3** informam a stack; você **respeita** a escolha e só valida lacunas (runner de teste? lint? CI?).
+- **P0/P1** → você **escolhe e justifica em uma frase simples** ("vou usar X porque é o jeito mais rápido e seguro de colocar isso no ar"). Defaults seguros e convencionais, não o mais sofisticado.
+
+A escolha não vira arquivo na Aliança — ela é **registrada no projeto do usuário** em `memory/stack.md` (Passo 7), que amarra o backbone abstrato aos comandos concretos **daquele** projeto.
 
 ---
 
@@ -127,7 +132,7 @@ Projeto: <nome/descrição>
 Persona: <P_>  ·  Edição: <Start/Pro/Org>
 Eixos:  Estrutura E=__  ·  Longevidade L=__  ·  Risco R=__
 Nível: <0–4>   (regra aplicada: <base | base+1 por risco>)
-Stack: <stack pack ou "a definir">
+Stack: <stack escolhida + 1 frase de porquê>
 Vou criar: <lista de pastas/arquivos do nível>
 Confirma? (sim / ajustar)
 ```
@@ -143,8 +148,36 @@ Após o "sim":
 1. Crie a estrutura do nível.
 2. Escreva `memory/vision.md` (o quê, persona, problema, usuários) e `memory/active-context.md` (estado inicial, próximos passos).
 3. Gere o **snapshot inicial** em `snapshots/snapshot-AAAA-MM-DD-setup.md`.
-4. Ative o stack pack escolhido (instale/configure ferramentas; ver `stacks/`).
+4. Gere **`memory/stack.md`** — o molde abaixo, preenchido para **este** projeto. É a ponte entre o backbone abstrato e os comandos reais; as instruções `testing` e `code-quality` leem este arquivo para saber qual comando rodar. Configure/instale as ferramentas que você listou nele.
 5. Configure higiene mínima: `.gitignore` + `.env.example` (nível ≥ 1).
 6. Atualize o `router.md` se alguma instrução passou a ser relevante para este projeto.
 
 A partir daqui, siga o **loop de operação** do `START-HERE.md`.
+
+---
+
+## Molde de `memory/stack.md` (preencha por projeto)
+
+> Genérico de propósito: a Aliança fornece a **estrutura**; você preenche o **conteúdo** com a stack que decidiu, do seu próprio conhecimento. Mantenha enxuto.
+
+```
+# stack — ferramentas concretas deste projeto
+
+Stack: <ex.: Next.js (TypeScript)>
+Por quê: <1 frase; para P0, em linguagem de produto>
+
+| Função        | Ferramenta      | Comando            |
+|---------------|-----------------|--------------------|
+| Instalar deps | <ex.: npm>      | <ex.: npm install> |
+| Rodar local   | <…>             | <ex.: npm run dev> |
+| Testes        | <ex.: Vitest>   | <ex.: npm test>    |
+| Lint          | <ex.: ESLint>   | <ex.: npm run lint>|
+| Format        | <ex.: Prettier> | <ex.: npm run fmt> |
+| Build         | <…>             | <ex.: npm run build>|
+
+CI (nível ≥ 2): <onde lint+test rodam no push; ex.: GitHub Actions>
+Higiene: .gitignore e .env.example criados (nível ≥ 1); segredo nunca commitado.
+Atualizado em: <AAAA-MM-DD>
+```
+
+Se a stack mudar depois, **atualize este arquivo** — ele é a fonte da verdade sobre as ferramentas do projeto.

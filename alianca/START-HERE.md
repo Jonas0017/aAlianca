@@ -61,7 +61,8 @@ Um **harness adaptativo**: estrutura + instruções que se moldam ao **projeto**
 | `START-HERE.md` | orientação inicial de qualquer LLM/humano (este arquivo) |
 | `router.md` | índice de instruções + gatilhos; leia a cada turno |
 | `instructions/` | módulos de instrução carregados por gatilho |
-| `memory/` | memória do projeto (vision, contexto ativo, decisões, arquivo) |
+| `memory/` | memória do projeto (vision, contexto ativo, `stack.md`, decisões, arquivo) |
 | `snapshots/` | pontos de retomada |
-| `stacks/` | pacotes por stack (ferramentas concretas) |
 | `../PROTOCOL.md` | a teoria / spec completa do harness |
+
+> A **stack não tem pasta**: a LLM decide as ferramentas no `setup` (do próprio conhecimento) e registra os comandos concretos em `memory/stack.md`, sob medida para cada projeto.

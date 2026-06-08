@@ -8,6 +8,7 @@ A **memória segmentada** da Aliança. Proibido um arquivo gigante único — a 
 |---|---|---|
 | `vision.md` | o que é o projeto, persona, problema, usuários | 1 |
 | `active-context.md` | estado de trabalho corrente (o que está em andamento) | 1 |
+| `stack.md` | ferramentas e comandos concretos do projeto (runner, lint, CI…) — gerado pelo `setup`; o backbone lê daqui | 0 |
 | `architecture.md` | arquitetura vigente | 2 |
 | `business-rules.md` | regras de negócio | 3 |
 | `security.md` | postura de segurança | se R ≥ 40 |

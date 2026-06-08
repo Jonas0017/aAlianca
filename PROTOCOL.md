@@ -2,7 +2,9 @@
 
 > **O elo que liga os dois mundos.**
 > Plataforma que gera o harness ideal para cada projeto, persona e stack — usável por qualquer LLM em conjunto com outras ferramentas.
-> **Versão:** 2.0 (rascunho) · substitui o conceito "APBP" v1 · Arquitetura de marca em §14.
+> **Versão:** 2.1 (rascunho) · substitui o conceito "APBP" v1 · Arquitetura de marca em §14.
+>
+> **2.0 → 2.1:** removido o conceito de *stack packs* (pasta `stacks/`). Sugerir ferramentas é trabalho da LLM, não do harness — qualquer modelo já conhece as opções, e um catálogo `.md` só inflaria o contexto e apodreceria. A escolha agora é **decidida no `setup`** e **registrada por projeto** em `memory/stack.md` (genérico, adapta-se ao projeto do dev final). Ver §15.B1.
 
 ---
 
@@ -210,7 +212,7 @@ O coração da v2. Em vez de um prompt gigante, a Aliança mantém **módulos de
     persona-p0.md    # gatilho: "usuário classificado como leigo"
     deep-questions.md# gatilho: "triagem indicou eixo ≥ 2"
     ...
-  /memory   /snapshots   /stacks
+  /memory   /snapshots
 ```
 
 ### Contrato de um módulo
@@ -347,7 +349,7 @@ O harness é tratado como **sistema vivo**: a cada marco, a Aliança reavalia pe
 | Bootstrap / questionário | `setup` (instrução) | dimensiona o projeto |
 | Memória segmentada | `memory/` | conhecimento preservado e versionado |
 | Snapshots | `snapshots/` | pontos de retomada |
-| Stack packs | `stacks/` | ferramentas concretas por stack |
+| Stack do projeto | `memory/stack.md` | ferramentas e comandos concretos, decididos no `setup` e registrados por projeto |
 | Agentes especializados | **agents** | os especialistas |
 | Agente gerente | **coordinator** | coordena os agents; consome só resumos |
 | Autovalidação | **health-check** | saúde do harness |
@@ -367,7 +369,7 @@ Um projeto **sobe de edição** conforme persona/nível evoluem (mesma mecânica
 ### Expansão
 
 - Nova instrução → mais um arquivo em `instructions/` + uma linha no `router.md`.
-- Nova stack → mais um pacote em `stacks/`, sem mudar nada estrutural.
+- Nova stack → a LLM decide e registra em `memory/stack.md` do projeto; nada muda na Aliança.
 - Novo especialista → mais um agent.
 - Novo público → nova edição.
 
@@ -386,7 +388,7 @@ Ideias que não estavam no escopo original mas que, na minha avaliação, são o
 
 ### B. Concretude (tirar do abstrato)
 
-- **B1. Stack Packs.** O backbone (testes/qualidade/refac) é abstrato até ser amarrado a uma stack. Pacotes prontos por stack (ex.: `pack-next`, `pack-fastapi`, `pack-node`) trazem o linter, o runner de teste, a config de CI e os comandos *concretos*. O Aliança escolhe o pack pela stack detectada. Isso é o que faz funcionar "de verdade" para o P0, que não sabe escolher ferramenta.
+- **B1. Stack registrada por projeto (não "stack packs").** O backbone (testes/qualidade/refac) é abstrato até ser amarrado a comandos concretos — mas esse vínculo **não** se faz com catálogos pré-escritos na Aliança. Sugerir ferramenta é trabalho da **LLM**: qualquer modelo já sabe "site → framework web, API → framework backend", e um `.md` congelado seria redundante, inflaria o contexto (viola o Princípio 4) e apodreceria a cada release de ferramenta. O que **é** do harness: garantir que a LLM (a) **decida** a stack no `setup` (P0/P1 → ela escolhe e justifica simples; P2/P3 → respeita a do dev) e (b) **registre** a escolha em `memory/stack.md` — fonte da verdade, por projeto, que `testing`/`code-quality` leem. Assim o estado vive em disco (Princípio 5), sobrevive a troca de sessão/modelo, e cada projeto recebe ferramentas sob medida sem a Aliança carregar enciclopédia alguma.
 - **B2. Definition of Done por tarefa.** Toda tarefa em `TASKS.md` carrega um contrato de conclusão amarrado ao backbone: testes passam, lint limpo, docs/memória atualizados. Fecha a porta para "terminei" sem verificação — a causa nº1 de falsa sensação de progresso.
 - **B3. Separação de ambientes** (dev/stage/prod) e gestão de variáveis/segredos a partir do Nível 2.
 - **B4. Convenções de controle de versão por nível.** Nível 0: git opcional. Nível 1+: git init no bootstrap, `.gitignore` adequado à stack, convenção de commits; Nível 3+: estratégia de branches.

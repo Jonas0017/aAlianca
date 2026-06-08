@@ -3,7 +3,7 @@
 > O índice **enxuto** da Aliança. Leia isto a cada turno; **carregue uma instrução só quando o gatilho dela casar** com o que você vai fazer agora. Não pré-carregue tudo.
 
 ```
-alianca-version: 2.0
+alianca-version: 2.1
 ```
 
 ---
