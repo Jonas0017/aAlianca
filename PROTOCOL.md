@@ -431,7 +431,7 @@ Ideias que não estavam no escopo original mas que, na minha avaliação, são o
 ## 16. Decisões em aberto (a resolver com o usuário)
 
 1. ~~Nome definitivo~~ → **resolvido: Aliança**, slogan "o elo que liga os dois mundos" (§14).
-2. **Idioma dos artefatos gerados** — seguir o idioma do usuário, ou fixar PT/EN?
+2. ~~Idioma dos artefatos gerados~~ → **resolvido: seguem o idioma do usuário** — a LLM já faz isso naturalmente, então o harness não instrui nada a respeito (evita carregar o que o modelo já sabe).
 3. ~~Formato de entrega da Aliança~~ → **resolvido: pasta-referência em `.md` puro** (model-agnostic; adapters por ferramenta no §13).
 4. **Calibração da rubrica** — os pesos do §4 precisam de validação com projetos reais.
 5. **P0 (leigo): até onde automatizar** — o quanto o LLM decide sozinho sem confirmar.
