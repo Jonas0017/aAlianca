@@ -215,6 +215,7 @@ O coração da v2. Em vez de um prompt gigante, a Aliança mantém **módulos de
     refactor.md      # gatilho: "ao detectar duplicação ou função > N linhas"
     code-quality.md  # gatilho: "antes de commit / em PR"
     security.md      # gatilho: "ao tocar auth, dados pessoais ou pagamento"  (só se R≥40)
+    interface.md     # gatilho: "ao criar/alterar superfície humana (tela, layout, CLI, erro de UI)"
     persona-p0.md    # gatilho: "usuário classificado como leigo"
     deep-questions.md# gatilho: "triagem indicou eixo ≥ 2"
     ...
