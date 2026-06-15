@@ -3,7 +3,7 @@
 > O índice **enxuto** da Aliança. Leia isto a cada turno; **carregue uma instrução só quando o gatilho dela casar** com o que você vai fazer agora. Não pré-carregue tudo.
 
 ```
-alianca-version: 2.1
+alianca-version: 2.2
 ```
 
 ---
@@ -30,7 +30,8 @@ A segurança nunca é sacrificada por estilo ou velocidade. (Estilo/formatação
 
 | Instrução | Gatilho (carregue quando…) | Fase | Aplica-se a | Status |
 |---|---|---|---|---|
-| `setup` | iniciar um projeto novo (sem `memory/active-context.md`) | bootstrap | todas as personas | ✅ pronto |
+| `setup` | iniciar um projeto **novo** (sem código e sem `memory/active-context.md`) | bootstrap | todas as personas | ✅ pronto |
+| `adopt` | integrar a Aliança a um projeto que **já existe** (há código/docs, sem pasta `alianca/`) | bootstrap | todas as personas | ✅ pronto |
 | `persona-p0` | usuário classificado como leigo (P0) | bootstrap+execução | P0 | ✅ pronto |
 | `deep-questions` | a triagem do setup indicou algum eixo ≥ 2 | bootstrap | níveis ≥ 2 | ✅ pronto |
 | `testing` | criar ou alterar lógica testável | execução | todos | ✅ pronto |

@@ -11,6 +11,8 @@ O momento em que os dois mundos se alinham. Aqui você **não escreve código** 
 
 ---
 
+> **Projeto novo ou já existente?** Este módulo é para projeto **novo** (sem código). Se o projeto **já existe** (há código/docs, mas não a pasta `alianca/`), **não rode este questionário** — carregue `adopt`, que lê a realidade em vez de perguntar. Os Passos 2–3 (rubrica, nível) e os Passos 5–8 (gerar, registrar, forcing function) deste módulo são reutilizados pela adoção.
+
 ## Passo 0 — Pergunta de abertura (classifica a persona)
 
 Faça **exatamente** esta pergunta, neutra:
@@ -165,6 +167,8 @@ Após o "sim":
 6. Configure o **controle de versão** conforme o nível (tabela abaixo).
 7. Atualize o `router.md` se alguma instrução passou a ser relevante para este projeto.
 
+7. **Ligue o forcing function** (Passo 8) — é o que torna o harness "sempre ligado".
+
 A partir daqui, siga o **loop de operação** do `START-HERE.md`.
 
 ### Controle de versão por nível
@@ -228,3 +232,47 @@ Toda tarefa carrega um **contrato de conclusão** amarrado ao backbone — fecha
 ````
 
 Uma tarefa só sai de "Em andamento" quando o DoD é satisfeito **de fato** (rodar e observar — ver `testing` e `code-quality`). Para P0, descreva a tarefa em linguagem de produto, sem jargão.
+
+---
+
+## Passo 8 — Forcing function (o que torna o harness "sempre ligado")
+
+Uma pasta `.md` é **passiva**: depende do LLM escolher lê-la. É por isso que sem isto o usuário precisa lembrar o agente de usar a Aliança. O **forcing function** é o mecanismo da ferramenta-hospedeira que faz **todo prompt** passar pelo roteamento, sem depender de memória do modelo. **Instale-o no bootstrap** — em projeto novo e na adoção.
+
+É um **adapter por ferramenta** (PROTOCOL §13). O princípio é universal: *injetar o roteamento em todo prompt*. O mecanismo concreto varia:
+
+| Ferramenta | Forcing function |
+|---|---|
+| **Claude Code** | (1) `CLAUDE.md` na raiz com o **kernel** abaixo — é sempre carregado no contexto; (2) hook **`UserPromptSubmit`** no `settings.json` — injeta o lembrete de roteamento de forma **determinística** (não depende do modelo honrar o arquivo). Use os dois: o hook garante, o kernel reforça. |
+| **Cursor / outros** | regra "always apply" (`.cursorrules` / rules) com o mesmo kernel. |
+| **Genérico** | preâmbulo no system prompt com o kernel. |
+
+### Molde — kernel (`CLAUDE.md` na raiz do projeto)
+
+```
+# <projeto>
+
+Este projeto usa a **Aliança** (harness em `alianca/`).
+Antes de responder QUALQUER prompt:
+1. Leia `alianca/router.md` e veja se algum gatilho casa com a ação atual.
+2. Siga o loop de `alianca/START-HERE.md §4` (CHECAR→CARREGAR→AGIR→VERIFICAR→PERSISTIR).
+Fonte única de memória do projeto: `alianca/memory/`. Não crie/use outra memória de projeto.
+Isto não é opcional.
+```
+
+### Molde — hook (`settings.json`, Claude Code)
+
+Um hook `UserPromptSubmit` cujo comando **imprime** o lembrete (a saída entra no contexto de cada prompt). Ajuste o shell ao SO:
+
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command",
+        "command": "echo 'Aliança ativa: antes de agir, leia alianca/router.md e siga o loop do START-HERE. Fonte única de memória: alianca/memory/.'" } ] }
+    ]
+  }
+}
+```
+
+> Para P0, não exponha o termo: "vou deixar o assistente sempre ligado no jeito certo de trabalhar, automaticamente." Confirme no dry-run, como o resto do bootstrap.

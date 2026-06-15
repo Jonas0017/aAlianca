@@ -4,6 +4,8 @@ A **memória segmentada** da Aliança. Proibido um arquivo gigante único — a 
 
 A **memória mínima** (`active-context.md` + `stack.md`) existe desde o **Nível 0** — é o que permite retomar o projeto (ver `START-HERE.md §2`). A segmentação (architecture, business-rules, decisions, archive) cresce com o nível.
 
+> **Fonte única (invariante):** esta pasta é a **única** memória de projeto ativa. Nunca opere com duas em paralelo. Ao adotar um projeto existente (ver `adopt`), o conhecimento antigo é acolhido aqui e o container antigo vai para `archive/`; a memória nativa da ferramenta (ex.: Claude Code) **aponta** para cá em vez de duplicar estado de projeto.
+
 > Este README descreve a **estrutura** e a **operação** da memória; o mapa completo Nível→artefatos é o do `setup` (Passo 5). Os momentos de mexer na memória são disparados pelo `health-check` (audita tamanho/duplicação) e pelo `snapshot`/marco (consolida).
 
 ## Estrutura

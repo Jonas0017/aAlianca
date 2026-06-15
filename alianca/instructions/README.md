@@ -9,10 +9,10 @@ Módulos de instrução da Aliança. Cada arquivo `.md` aqui é carregado **sob 
 
 ## Estado atual
 
-- ✅ Bootstrap: `setup` · `deep-questions` · `persona-p0`
+- ✅ Bootstrap: `setup` (novo) · `adopt` (projeto existente) · `deep-questions` · `persona-p0`
 - ✅ Backbone: `testing` · `code-quality` · `refactor` · `bug-prevention` · `security` · `architecture`
 - ✅ Superfície humana: `interface` (design, ergonomia, acessibilidade)
 - ✅ Sistema: `snapshot` · `migration` · `health-check`
 - ✅ Operação: `agents` (múltiplos agentes)
 
-**Todas as 14 instruções estão prontas.** A Aliança está conceitualmente fechada. A stack do projeto não vive aqui: a LLM a decide no `setup` e registra em `memory/stack.md`. Próximo passo é o **dogfood** (rodar o `setup` num projeto real e calibrar a rubrica).
+**Todas as 15 instruções estão prontas.** A Aliança está conceitualmente fechada. A stack do projeto não vive aqui: a LLM a decide no `setup` e registra em `memory/stack.md`. Próximo passo é o **dogfood** (rodar o `setup` num projeto real e calibrar a rubrica).

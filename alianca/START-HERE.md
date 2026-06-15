@@ -5,16 +5,29 @@
 
 ---
 
+## 0. Te pediram para "instalar / integrar a Aliança neste projeto"?
+
+Se o comando do usuário foi algo como *"baixa e instala esse código aqui"*, *"integra a Aliança nesse projeto"* ou *"usa esse harness"* — **este arquivo é o ponto de partida e você já tem tudo para agir**, sem pedir mais instruções:
+
+1. **Garanta que a pasta `alianca/` está na raiz do projeto** (se ainda não está, copie/clone a pasta-referência para cá).
+2. **Decida o caminho** pela regra do §2 abaixo: projeto que **já tem código** → instrução **`adopt`** (integração/"abraço": lê a realidade, acolhe a memória antiga, não recomeça nada); projeto **vazio** → **`setup`**.
+3. **O `adopt`/`setup` instala o forcing function** (kernel no `CLAUDE.md` + hook `UserPromptSubmit`; `setup` Passo 8). É o passo que torna a instalação **permanente**: a partir dele, **todo prompt** passa pelo harness automaticamente — o usuário nunca mais precisa lembrar você de usá-lo.
+
+> Em resumo: **um comando de instalação é suficiente.** Você lê este arquivo, roda `adopt` (ou `setup`), e liga o "sempre ligado". Daí em diante o harness se conduz sozinho.
+
+---
+
 ## 1. O que é a Aliança
 
 Um **harness adaptativo**: estrutura + instruções que se moldam ao **projeto**, à **pessoa** e à **stack**, para que qualquer LLM trabalhe com baixo risco de alucinação, retrabalho, perda de contexto e dívida técnica. A Aliança não despeja tudo no seu contexto — ela mantém um índice (`router.md`) e você **carrega cada instrução no momento exato** em que o gatilho dela ocorre.
 
 ---
 
-## 2. Sua primeira decisão: projeto novo ou em andamento?
+## 2. Sua primeira decisão: novo, existente ou em andamento?
 
-- **`memory/active-context.md` NÃO existe** → projeto **novo** → vá para o §3 (Setup).
-- **`memory/active-context.md` existe** → projeto **em andamento** → leia o **snapshot** mais recente em `snapshots/`, depois `memory/active-context.md`, e **retome de onde parou** sem depender de histórico anterior.
+- **`memory/active-context.md` existe** → projeto Aliança **em andamento** → leia o **snapshot** mais recente em `snapshots/`, depois `memory/active-context.md`, e **retome de onde parou** sem depender de histórico anterior.
+- **NÃO existe `active-context.md`, e o projeto já tem código/docs** (mas nunca usou a Aliança) → **adoção** → carregue a instrução `adopt`. Você **lê a realidade** e integra o harness ao que já existe — **não** rode o questionário do `setup` por cima. (É um abraço: o projeto continua sendo o que é; a memória antiga é acolhida, não substituída.)
+- **NÃO existe `active-context.md`, e não há código ainda** → projeto **novo** → vá para o §3 (Setup).
 
 ---
 
@@ -27,6 +40,7 @@ Um **harness adaptativo**: estrutura + instruções que se moldam ao **projeto**
 3. **Pontue os 3 eixos** — Estrutura (E), Longevidade (L), Risco (R) — e calcule o **Nível (0–4)**, uma **estimativa inicial**: base = `banda(E)`; **+1** se Longevidade alta, **+1** se Risco alto (cap 4). Qualquer sinal sensível engaja a segurança, proporcional ao risco.
 4. **Mostre a estrutura proposta e confirme (dry-run)** antes de criar arquivos.
 5. **Gere** a estrutura do nível: memória mínima (`memory/active-context.md` + `memory/stack.md`; `vision.md` a partir do Nível 1) e, **a partir do Nível 1**, um snapshot inicial em `snapshots/`.
+6. **Instale o forcing function** (`setup` Passo 8) — sem ele, o harness não fica "sempre ligado".
 
 ---
 
@@ -47,6 +61,8 @@ Um **harness adaptativo**: estrutura + instruções que se moldam ao **projeto**
 
 ## 5. Invariantes (valem sempre, em todos os níveis)
 
+- **Sempre ligado:** o loop do §4 não é opcional — **todo prompt** passa pelo roteamento do `router.md` antes de qualquer ação. Quem garante isso sem depender de você lembrar é o **forcing function** instalado no bootstrap (Claude Code: kernel no `CLAUDE.md` + hook `UserPromptSubmit`; ver `setup` Passo 8). Se ele não existe neste projeto, **instale-o**.
+- **Uma só memória de projeto:** a fonte da verdade é `alianca/memory/`. Nunca opere com duas memórias ativas em paralelo — memória nativa da ferramenta ou docs legados **apontam** para `memory/` ou são arquivados (ver `adopt`).
 - **Backbone inegociável:** testes, qualidade de código, refatoração e prevenção de bugs estão **sempre** presentes — só a profundidade varia por nível.
 - **Use o que já existe:** antes de construir algo não-trivial, veja se há pronto — skill, ferramenta, biblioteca ou serviço (MCP) que resolva. Reaproveitar > reinventar; construa do zero só quando nada serve. Dependência externa entra com higiene (proveniência, licença, scan — ver `security`).
 - **Definition of Done:** uma tarefa só fecha com **testes passando, lint limpo e docs/memória atualizados**.

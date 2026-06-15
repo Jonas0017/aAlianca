@@ -26,12 +26,15 @@ A Aliança resolve isso sendo um **arquiteto, não um construtor**: ela não ent
 
 ## Como usar
 
-A Aliança é a pasta [`alianca/`](alianca/). Para usá-la em um projeto:
+A Aliança é a pasta [`alianca/`](alianca/). **Um comando basta** — "baixa e instala esse harness neste projeto" / "integra a Aliança aqui". A partir daí:
 
-1. **Copie a pasta `alianca/`** para a raiz do seu projeto.
-2. **Aponte seu LLM para [`alianca/START-HERE.md`](alianca/START-HERE.md)** e diga para lê-lo primeiro. Esse arquivo + o [`router.md`](alianca/router.md) bastam para operar.
-3. Em um **projeto novo**, o LLM conduz o `setup` (questionário curto), dimensiona o projeto e gera a estrutura sob medida — confirmando com você antes de criar nada.
-4. Em um **projeto em andamento**, o LLM lê o snapshot mais recente e retoma de onde parou.
+1. **Copie a pasta `alianca/`** para a raiz do seu projeto (ou peça ao LLM para fazê-lo).
+2. **Aponte seu LLM para [`alianca/START-HERE.md`](alianca/START-HERE.md)** e diga para lê-lo primeiro. Esse arquivo + o [`router.md`](alianca/router.md) bastam para o LLM entender tudo que precisa fazer.
+3. Em um **projeto novo** (vazio), o LLM conduz o `setup` (questionário curto), dimensiona e gera a estrutura sob medida — confirmando antes de criar nada.
+4. Em um **projeto que já existe**, o LLM roda a `adopt`: **lê o código e os docs**, infere o nível, **acolhe a memória antiga numa fonte única** e integra o harness — sem recomeçar e sem mexer no comportamento (é integração, não substituição).
+5. Em um **projeto Aliança em andamento**, o LLM lê o snapshot mais recente e retoma de onde parou.
+
+> **Sempre ligado:** no bootstrap, o LLM instala um *forcing function* (em Claude Code: kernel no `CLAUDE.md` + hook `UserPromptSubmit`). É o que faz **todo prompt** passar pelo harness automaticamente — você não precisa lembrar o LLM de usá-lo a cada vez.
 
 **Mapeamento por ferramenta:**
 
@@ -53,13 +56,14 @@ A Aliança é a pasta [`alianca/`](alianca/). Para usá-la em um projeto:
 
 ---
 
-## As 13 instruções
+## As 15 instruções
 
 Carregadas **uma por vez, por gatilho** (índice completo em [`alianca/router.md`](alianca/router.md)):
 
 | Instrução | Carregue quando… |
 |---|---|
 | [`setup`](alianca/instructions/setup.md) | iniciar um projeto novo (bootstrap) |
+| [`adopt`](alianca/instructions/adopt.md) | integrar a Aliança a um projeto que já existe (brownfield) |
 | [`persona-p0`](alianca/instructions/persona-p0.md) | o usuário é leigo (P0) |
 | [`deep-questions`](alianca/instructions/deep-questions.md) | a triagem indicou um eixo ≥ 2 |
 | [`testing`](alianca/instructions/testing.md) | criar/alterar lógica testável |
@@ -68,6 +72,7 @@ Carregadas **uma por vez, por gatilho** (índice completo em [`alianca/router.md
 | [`refactor`](alianca/instructions/refactor.md) | detectar duplicação ou função longa demais |
 | [`bug-prevention`](alianca/instructions/bug-prevention.md) | código com risco de erro (entrada externa, estado, concorrência) |
 | [`security`](alianca/instructions/security.md) | tocar em auth, dados pessoais, pagamentos ou segredos |
+| [`interface`](alianca/instructions/interface.md) | criar/alterar superfície humana: tela, layout, fluxo, CLI, texto de UI |
 | [`snapshot`](alianca/instructions/snapshot.md) | antes de tarefa grande ou ao concluir um marco |
 | [`migration`](alianca/instructions/migration.md) | o projeto cresceu/encolheu e o nível precisa mudar |
 | [`health-check`](alianca/instructions/health-check.md) | revisar a saúde do harness (periódico) |
@@ -85,7 +90,7 @@ Carregadas **uma por vez, por gatilho** (índice completo em [`alianca/router.md
 └─ alianca/           ← a implementação de referência (é isto que você copia)
    ├─ START-HERE.md   ← ponto de entrada de qualquer LLM
    ├─ router.md       ← índice das instruções + gatilhos + precedência
-   ├─ instructions/   ← as 13 instruções carregadas por gatilho
+   ├─ instructions/   ← as 15 instruções carregadas por gatilho
    ├─ memory/         ← memória do projeto (contexto, stack, decisões, arquivo)
    └─ snapshots/      ← pontos de retomada
 ```
@@ -115,7 +120,7 @@ Um projeto **sobe de edição** conforme a persona e o nível evoluem — sem re
 
 ## Status
 
-Versão **2.1** (rascunho, em evolução). As 13 instruções estão prontas e a Aliança está conceitualmente fechada; o calibre fino da rubrica continua se ajustando no uso real, pelo próprio loop adaptativo (estimativa → observa → reajusta). **Validada na prática** com um teste A/B em duas LLMs (Claude e Copilot) — ver [`VALIDATION.md`](VALIDATION.md). Idioma de trabalho: **PT-BR** (artefatos gerados seguem o idioma do usuário).
+Versão **2.2** (rascunho, em evolução). As 15 instruções estão prontas e a Aliança está conceitualmente fechada; o calibre fino da rubrica continua se ajustando no uso real, pelo próprio loop adaptativo (estimativa → observa → reajusta). A **2.2** trouxe o módulo `interface` (design/ergonomia/acessibilidade), o caminho `adopt` (integrar a projetos que já existem, com memória de fonte única) e o **forcing function "sempre ligado"** (todo prompt passa pelo harness, sem depender do modelo lembrar). **Validada na prática** com um teste A/B em duas LLMs (Claude e Copilot) — ver [`VALIDATION.md`](VALIDATION.md). Idioma de trabalho: **PT-BR** (artefatos gerados seguem o idioma do usuário).
 
 ---
 

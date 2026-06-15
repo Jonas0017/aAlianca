@@ -2,7 +2,9 @@
 
 > **O elo que liga os dois mundos.**
 > Plataforma que gera o harness ideal para cada projeto, persona e stack — usável por qualquer LLM em conjunto com outras ferramentas.
-> **Versão:** 2.1 (rascunho) · substitui o conceito "APBP" v1 · Arquitetura de marca em §14.
+> **Versão:** 2.2 (rascunho) · substitui o conceito "APBP" v1 · Arquitetura de marca em §14.
+>
+> **2.1 → 2.2:** (a) módulo **`interface`** (design, ergonomia, acessibilidade — a superfície humana); (b) caminho **brownfield `adopt`** para integrar a Aliança a projetos que já existem, com **migração de memória** para fonte única; (c) **forcing function "sempre ligado"** — todo prompt passa pelo roteamento sem depender do modelo lembrar (Claude Code: kernel no `CLAUDE.md` + hook `UserPromptSubmit`; ver §13 e `setup` Passo 8).
 >
 > **2.0 → 2.1:** removido o conceito de *stack packs* (pasta `stacks/`). Sugerir ferramentas é trabalho da LLM, não do harness — qualquer modelo já conhece as opções, e um catálogo `.md` só inflaria o contexto e apodreceria. A escolha agora é **decidida no `setup`** e **registrada por projeto** em `memory/stack.md` (genérico, adapta-se ao projeto do dev final). Ver §15.B1.
 
@@ -211,6 +213,7 @@ O coração da v2. Em vez de um prompt gigante, a Aliança mantém **módulos de
   router.md          # índice enxuto: lista de instruções + gatilho de cada uma
   /instructions
     setup.md         # gatilho: "iniciar projeto novo"
+    adopt.md         # gatilho: "integrar a um projeto que já existe (brownfield)"
     testing.md       # gatilho: "ao criar/alterar lógica testável"
     refactor.md      # gatilho: "ao detectar duplicação ou função > N linhas"
     code-quality.md  # gatilho: "antes de commit / em PR"
@@ -339,10 +342,13 @@ O harness é tratado como **sistema vivo**: a cada marco, a Aliança reavalia pe
 | Conceita Aliança | Claude Code | Cursor / genérico |
 |---|---|---|
 | Instrução just-in-time | Skill (com TRIGGER) | Arquivo em `/alianca/instructions` + `router.md` no prompt |
+| **Forcing function** ("sempre ligado") | `CLAUDE.md` (kernel sempre carregado) **+ hook `UserPromptSubmit`** (injeção determinística por prompt) | regra "always apply" (`.cursorrules`/rules) ou preâmbulo no system prompt |
 | Especialista | Subagent (tool Agent) | Sessão/role separada com prompt dedicado |
 | Memória | Sistema de memória nativo | `/memory` em disco |
 | Backbone | Skills de testing/quality/refactor | Mesmos módulos via router |
 | Snapshot | Arquivo em `/memory` ou nativo | Arquivo `SNAPSHOT.md` |
+
+> **Forcing function não é opcional.** Uma pasta `.md` é passiva: sem um mecanismo que injete o roteamento em **todo prompt**, o agente esquece de usar o harness e o usuário precisa lembrá-lo — o que esvazia todo o resto. Por isso o `setup`/`adopt` **instalam** o forcing function da ferramenta no bootstrap. Em Claude Code o hook `UserPromptSubmit` é a camada **determinística** (não depende do modelo honrar um arquivo); o `CLAUDE.md` é o reforço sempre-carregado.
 
 ---
 
