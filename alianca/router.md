@@ -22,7 +22,7 @@ security  >  bug-prevention  >  testing  >  architecture  >  refactor  >  interf
 
 A segurança nunca é sacrificada por estilo ou velocidade. (Estilo/formatação não é um módulo à parte — é o piso do `code-quality`.) `interface` e `code-quality` são pisos de superfícies diferentes — o que o humano usa e o código-fonte — e raramente colidem; quando colidem, correção vem antes de aparência.
 
-> Os módulos de ciclo de vida (`snapshot`, `migration`, `health-check`, `agents`) ficam **fora** desta ordem — coordenam o trabalho, não competem com os módulos de código.
+> Os módulos de ciclo de vida (`tasks`, `questions`, `snapshot`, `migration`, `health-check`, `agents`) ficam **fora** desta ordem — coordenam o trabalho, não competem com os módulos de código.
 
 ---
 
@@ -31,6 +31,8 @@ A segurança nunca é sacrificada por estilo ou velocidade. (Estilo/formatação
 | Instrução | Gatilho (carregue quando…) | Fase | Aplica-se a | Status |
 |---|---|---|---|---|
 | `setup` | iniciar um projeto **novo** (sem código e sem `memory/active-context.md`) | bootstrap | todas as personas | ✅ pronto |
+| `tasks` | criar uma tarefa, ou mover uma tarefa entre os 4 estados (sobretudo ao declarar algo "pronto") | execução | todos | ✅ pronto |
+| `questions` | perguntar algo sobre o projeto, adiar uma resposta ("responde depois") ou registrar uma resposta | execução | todos | ✅ pronto |
 | `adopt` | integrar a Aliança a um projeto que **já existe** (há código/docs, sem pasta `alianca/`) | bootstrap | todas as personas | ✅ pronto |
 | `persona-p0` | usuário classificado como leigo (P0) | bootstrap+execução | P0 | ✅ pronto |
 | `deep-questions` | a triagem do setup indicou algum eixo ≥ 2 | bootstrap | níveis ≥ 2 | ✅ pronto |

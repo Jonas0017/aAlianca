@@ -16,6 +16,7 @@ A **memória mínima** (`active-context.md` + `stack.md`) existe desde o **Níve
 | `stack.md` | ferramentas e comandos concretos do projeto (runner, lint, CI…) — gerado pelo `setup`; o backbone lê daqui | 0 |
 | `vision.md` | o que é o projeto, persona, problema, usuários | 1 |
 | `feedback.md` | aprendizado do projeto: erro recorrente → regra ("aqui sempre erramos X → faça Y") | qualquer (sob demanda) |
+| `questions/` | perguntas sobre o projeto, agrupadas por tópico (um arquivo por assunto, cruzados por link); estados aberta/respondida — ver instrução `questions` | qualquer (sob demanda) |
 | `architecture.md` | arquitetura vigente | 2 |
 | `business-rules.md` | regras de negócio | 3 |
 | `security.md` | postura de segurança | se R ≥ 40 |

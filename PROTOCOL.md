@@ -162,7 +162,7 @@ Segurança  = qualquer sinal sensível engaja, proporcional ao risco (não depen
   `README.md`, `TASKS.md`, `ARCHITECTURE.md` + `memory/vision.md`. Backbone explícito mas simples.
 
 - **Nível 2 — Estruturado**
-  `/docs` (`requirements.md`, `architecture.md`), `/tasks` (`backlog.md`), `/tests`, `memory/` segmentada começa (`architecture.md`). Backbone com CI básico.
+  `/docs` (`requirements.md`, `architecture.md`), `/tasks` (índice `TASKS.md` + arquivo por tarefa; 4 estados — ver `tasks`), `/tests`, `memory/` segmentada começa (`architecture.md`). Backbone com CI básico.
 
 - **Nível 3 — Robusto**
   `/docs` (`requirements`, `architecture`), `/tasks`, `/tests`, `/memory` segmentada (`business-rules`, `security` se R≥40, `decisions/`, `archive/`). Backbone com pipeline completo. Multiagente opcional.
@@ -261,6 +261,7 @@ Proibido `memory.md` gigante (regra mantida da v1). Uma **memória mínima** (`a
   stack.md             # ferramentas e comandos do projeto (desde o Nível 0)
   vision.md
   feedback.md          # aprendizado: erro recorrente → regra (sob demanda)
+  /questions           # perguntas sobre o projeto, por tópico (aberta/respondida — sob demanda)
   architecture.md
   business-rules.md
   security.md          # se R ≥ 40
@@ -344,11 +345,13 @@ O harness é tratado como **sistema vivo**: a cada marco, a Aliança reavalia pe
 | Instrução just-in-time | Skill (com TRIGGER) | Arquivo em `/alianca/instructions` + `router.md` no prompt |
 | **Forcing function** ("sempre ligado") | `CLAUDE.md` (kernel sempre carregado) **+ hook `UserPromptSubmit`** (injeção determinística por prompt) | regra "always apply" (`.cursorrules`/rules) ou preâmbulo no system prompt |
 | Especialista | Subagent (tool Agent) | Sessão/role separada com prompt dedicado |
-| Memória | Sistema de memória nativo | `/memory` em disco |
+| Memória | Sistema de memória nativo (na adoção, **reescrito** p/ obedecer a Aliança — Regra zero) | `/memory` em disco |
 | Backbone | Skills de testing/quality/refactor | Mesmos módulos via router |
 | Snapshot | Arquivo em `/memory` ou nativo | Arquivo `SNAPSHOT.md` |
 
 > **Forcing function não é opcional.** Uma pasta `.md` é passiva: sem um mecanismo que injete o roteamento em **todo prompt**, o agente esquece de usar o harness e o usuário precisa lembrá-lo — o que esvazia todo o resto. Por isso o `setup`/`adopt` **instalam** o forcing function da ferramenta no bootstrap. Em Claude Code o hook `UserPromptSubmit` é a camada **determinística** (não depende do modelo honrar um arquivo); o `CLAUDE.md` é o reforço sempre-carregado.
+
+> **Regra zero na adoção (inegociável, qualquer LLM).** Em projeto em andamento, a primeira garantia é **reescrever TODA a memória nativa do LLM** (Claude Code: `CLAUDE.md` + memória nativa; Cursor: `.cursorrules`/rules; outros: `AGENTS.md`/system prompt) para que ela **mande seguir a Aliança** e **aponte para `alianca/memory/`** como fonte única — nunca uma fonte concorrente. É a defesa em profundidade que se soma ao forcing function: o mecanismo da ferramenta injeta o roteamento, e a própria memória do modelo também o ordena. Detalhe operacional em `adopt` (Regra zero).
 
 ---
 
@@ -410,7 +413,7 @@ Ideias que não estavam no escopo original mas que, na minha avaliação, são o
 ### B. Concretude (tirar do abstrato)
 
 - **B1. Stack registrada por projeto (não "stack packs").** O backbone (testes/qualidade/refac) é abstrato até ser amarrado a comandos concretos — mas esse vínculo **não** se faz com catálogos pré-escritos na Aliança. Sugerir ferramenta é trabalho da **LLM**: qualquer modelo já sabe "site → framework web, API → framework backend", e um `.md` congelado seria redundante, inflaria o contexto (viola o Princípio 4) e apodreceria a cada release de ferramenta. O que **é** do harness: garantir que a LLM (a) **decida** a stack no `setup` (P0/P1 → ela escolhe e justifica simples; P2/P3 → respeita a do dev) e (b) **registre** a escolha em `memory/stack.md` — fonte da verdade, por projeto, que `testing`/`code-quality` leem. Assim o estado vive em disco (Princípio 5), sobrevive a troca de sessão/modelo, e cada projeto recebe ferramentas sob medida sem a Aliança carregar enciclopédia alguma.
-- **B2. Definition of Done por tarefa.** ✅ *Implementado* no `setup` (molde de `TASKS.md`: cada tarefa carrega um contrato de conclusão — testes verdes, lint limpo, docs/memória atualizados). Fecha a porta para "terminei" sem verificação.
+- **B2. Definition of Done por tarefa.** ✅ *Implementado* no `tasks` + `setup` (molde de `TASKS.md` com 4 estados: A fazer · Em andamento · Realizada · Validada e testada). A fronteira **Realizada → Validada** carrega o contrato de conclusão — testes verdes, lint limpo, comportamento observado, docs/memória atualizados — e só se cruza rodando e observando. Separa "escrevi" de "funciona" e fecha a porta para "terminei" sem verificação.
 - **B3. Separação de ambientes.** ✅ *Implementado* no `security` (dev/stage/prod e gestão de segredos por ambiente a partir do Nível 2).
 - **B4. Convenções de controle de versão por nível.** ✅ *Implementado* no `setup` (Passo 7): Nível 0 git opcional; Nível 1+ repositório no bootstrap, `.gitignore` da stack, commits pequenos e descritivos; Nível 2+ mensagem padronizada e commit que não quebra o build; Nível 3+ estratégia de branches.
 

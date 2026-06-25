@@ -120,7 +120,7 @@ Este nível é uma **estimativa de partida**, não um veredito. O questionário 
 
 - **Nível 0:** `README.md`, `TASKS.md` + `memory/` mínima (`active-context.md`, `stack.md`). Backbone automático/invisível — sem hook/CI; o agente roda testes e lint no passo VERIFICAR de cada turno (`START-HERE` §4).
 - **Nível 1:** + `ARCHITECTURE.md`, `memory/vision.md`. Backbone simples explícito.
-- **Nível 2:** `docs/` (`requirements`, `architecture`), `tasks/backlog.md`, `tests/`, CI básico, `memory/architecture.md` (segmentação começa).
+- **Nível 2:** `docs/` (`requirements`, `architecture`), `tasks/` (índice `TASKS.md` + arquivo por tarefa, ver `tasks`), `tests/`, CI básico, `memory/architecture.md` (segmentação começa).
 - **Nível 3:** `docs/` (`requirements`, `architecture`), `memory/` segmentada completa (`business-rules.md`, `security.md` se R≥40, `decisions/`, `archive/`), `tests/` completo, snapshots periódicos. Agents conforme a stack.
 - **Nível 4:** + `agents/`, `workflows/`, `security/`, `audits/`, `metrics/`, `governance/`. Time completo de agents + coordinator. Snapshots automáticos.
 
@@ -214,9 +214,9 @@ Se a stack mudar depois, **atualize este arquivo** — ele é a fonte da verdade
 
 ---
 
-## Molde de `TASKS.md` (Definition of Done por tarefa)
+## Molde de `TASKS.md` (4 estados + Definition of Done por tarefa)
 
-Toda tarefa carrega um **contrato de conclusão** amarrado ao backbone — fecha a porta para "terminei" sem verificação. Criado já no Nível 0.
+Toda tarefa atravessa **4 estados** e carrega um **contrato de conclusão** amarrado ao backbone — o que fecha a porta para "terminei" sem verificação. Criado já no Nível 0. A regra completa de criar/mover tarefas está na instrução `tasks`.
 
 ````
 # TASKS — <projeto>
@@ -227,11 +227,14 @@ Toda tarefa carrega um **contrato de conclusão** amarrado ao backbone — fecha
 ## Em andamento
 - [ ] <tarefa>   ·  <agente/dono, se houver>
 
-## Concluído
-- [x] <tarefa>   ·  <AAAA-MM-DD>
+## Realizada (escrita — aguardando validação)
+- [~] <tarefa>   ·  <o que falta observar para validar>
+
+## Validada e testada
+- [x] <tarefa>   ·  <AAAA-MM-DD> · <evidência: teste/observação>
 ````
 
-Uma tarefa só sai de "Em andamento" quando o DoD é satisfeito **de fato** (rodar e observar — ver `testing` e `code-quality`). Para P0, descreva a tarefa em linguagem de produto, sem jargão.
+A fronteira **Realizada → Validada** é a regra inegociável: só passa rodando e observando (DoD de fato — ver `testing` e `code-quality`), nunca de cabeça. "Realizada" é o limbo do *"achei que funciona"*; a tarefa só **fecha** em *Validada*. A partir do Nível 2, a raiz ganha a pasta `tasks/` no esquema índice + arquivo (`tasks/TASKS.md` indexa, tarefa não-trivial vira `tasks/<slug>.md`) — detalhe em `tasks`. Para P0, descreva a tarefa em linguagem de produto, sem jargão.
 
 ---
 

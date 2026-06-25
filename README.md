@@ -56,7 +56,7 @@ A Aliança é a pasta [`alianca/`](alianca/). **Um comando basta** — "baixa e 
 
 ---
 
-## As 15 instruções
+## As 17 instruções
 
 Carregadas **uma por vez, por gatilho** (índice completo em [`alianca/router.md`](alianca/router.md)):
 
@@ -73,6 +73,8 @@ Carregadas **uma por vez, por gatilho** (índice completo em [`alianca/router.md
 | [`bug-prevention`](alianca/instructions/bug-prevention.md) | código com risco de erro (entrada externa, estado, concorrência) |
 | [`security`](alianca/instructions/security.md) | tocar em auth, dados pessoais, pagamentos ou segredos |
 | [`interface`](alianca/instructions/interface.md) | criar/alterar superfície humana: tela, layout, fluxo, CLI, texto de UI |
+| [`tasks`](alianca/instructions/tasks.md) | criar uma tarefa ou movê-la entre os 4 estados (A fazer · Em andamento · Realizada · Validada) |
+| [`questions`](alianca/instructions/questions.md) | perguntar algo sobre o projeto, adiar uma resposta ou registrá-la (por tópico) |
 | [`snapshot`](alianca/instructions/snapshot.md) | antes de tarefa grande ou ao concluir um marco |
 | [`migration`](alianca/instructions/migration.md) | o projeto cresceu/encolheu e o nível precisa mudar |
 | [`health-check`](alianca/instructions/health-check.md) | revisar a saúde do harness (periódico) |
@@ -90,7 +92,7 @@ Carregadas **uma por vez, por gatilho** (índice completo em [`alianca/router.md
 └─ alianca/           ← a implementação de referência (é isto que você copia)
    ├─ START-HERE.md   ← ponto de entrada de qualquer LLM
    ├─ router.md       ← índice das instruções + gatilhos + precedência
-   ├─ instructions/   ← as 15 instruções carregadas por gatilho
+   ├─ instructions/   ← as 17 instruções carregadas por gatilho
    ├─ memory/         ← memória do projeto (contexto, stack, decisões, arquivo)
    └─ snapshots/      ← pontos de retomada
 ```
@@ -120,7 +122,7 @@ Um projeto **sobe de edição** conforme a persona e o nível evoluem — sem re
 
 ## Status
 
-Versão **2.2** (rascunho, em evolução). As 15 instruções estão prontas e a Aliança está conceitualmente fechada; o calibre fino da rubrica continua se ajustando no uso real, pelo próprio loop adaptativo (estimativa → observa → reajusta). A **2.2** trouxe o módulo `interface` (design/ergonomia/acessibilidade), o caminho `adopt` (integrar a projetos que já existem, com memória de fonte única) e o **forcing function "sempre ligado"** (todo prompt passa pelo harness, sem depender do modelo lembrar). **Validada na prática** com um teste A/B em duas LLMs (Claude e Copilot) — ver [`VALIDATION.md`](VALIDATION.md). Idioma de trabalho: **PT-BR** (artefatos gerados seguem o idioma do usuário).
+Versão **2.2** (rascunho, em evolução). As 17 instruções estão prontas e a Aliança está conceitualmente fechada; o calibre fino da rubrica continua se ajustando no uso real, pelo próprio loop adaptativo (estimativa → observa → reajusta). A **2.2** trouxe o módulo `interface` (design/ergonomia/acessibilidade), o caminho `adopt` (integrar a projetos que já existem, com memória de fonte única) e o **forcing function "sempre ligado"** (todo prompt passa pelo harness, sem depender do modelo lembrar). **Validada na prática** com um teste A/B em duas LLMs (Claude e Copilot) — ver [`VALIDATION.md`](VALIDATION.md). Idioma de trabalho: **PT-BR** (artefatos gerados seguem o idioma do usuário).
 
 ---
 
