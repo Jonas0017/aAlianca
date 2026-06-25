@@ -26,7 +26,7 @@ Um **harness adaptativo**: estrutura + instruções que se moldam ao **projeto**
 ## 2. Sua primeira decisão: novo, existente ou em andamento?
 
 - **`memory/active-context.md` existe** → projeto Aliança **em andamento** → leia o **snapshot** mais recente em `snapshots/`, depois `memory/active-context.md`, e **retome de onde parou** sem depender de histórico anterior.
-- **NÃO existe `active-context.md`, e o projeto já tem código/docs** (mas nunca usou a Aliança) → **adoção** → carregue a instrução `adopt`. Você **lê a realidade** e integra o harness ao que já existe — **não** rode o questionário do `setup` por cima. (É um abraço: o projeto continua sendo o que é; a memória antiga é acolhida, não substituída.)
+- **NÃO existe `active-context.md`, e o projeto já tem código/docs** (mas nunca usou a Aliança) → **adoção** → carregue a instrução `adopt`. Você **lê a realidade** e integra o harness ao que já existe — **não** rode o questionário do `setup` por cima. (É um abraço: o projeto continua sendo o que é; a memória antiga é acolhida, não substituída.) **Regra zero, inegociável e válida para qualquer LLM:** a primeira coisa garantida pela adoção é **reescrever TODOS os arquivos de memória nativa** para que sempre mandem seguir a Aliança e apontem para `alianca/memory/` (ver `adopt`).
 - **NÃO existe `active-context.md`, e não há código ainda** → projeto **novo** → vá para o §3 (Setup).
 
 ---
@@ -62,7 +62,7 @@ Um **harness adaptativo**: estrutura + instruções que se moldam ao **projeto**
 ## 5. Invariantes (valem sempre, em todos os níveis)
 
 - **Sempre ligado:** o loop do §4 não é opcional — **todo prompt** passa pelo roteamento do `router.md` antes de qualquer ação. Quem garante isso sem depender de você lembrar é o **forcing function** instalado no bootstrap (Claude Code: kernel no `CLAUDE.md` + hook `UserPromptSubmit`; ver `setup` Passo 8). Se ele não existe neste projeto, **instale-o**.
-- **Uma só memória de projeto:** a fonte da verdade é `alianca/memory/`. Nunca opere com duas memórias ativas em paralelo — memória nativa da ferramenta ou docs legados **apontam** para `memory/` ou são arquivados (ver `adopt`).
+- **Uma só memória de projeto:** a fonte da verdade é `alianca/memory/`. Nunca opere com duas memórias ativas em paralelo — memória nativa da ferramenta ou docs legados **apontam** para `memory/` ou são arquivados (ver `adopt`). **Na adoção isto é inegociável e vale para qualquer LLM:** toda memória nativa é **reescrita** para mandar seguir a Aliança e apontar para `memory/` (Regra zero do `adopt`), nunca mantida como fonte concorrente.
 - **Backbone inegociável:** testes, qualidade de código, refatoração e prevenção de bugs estão **sempre** presentes — só a profundidade varia por nível.
 - **Use o que já existe:** antes de construir algo não-trivial, veja se há pronto — skill, ferramenta, biblioteca ou serviço (MCP) que resolva. Reaproveitar > reinventar; construa do zero só quando nada serve. Dependência externa entra com higiene (proveniência, licença, scan — ver `security`).
 - **Definition of Done:** uma tarefa só fecha com **testes passando, lint limpo e docs/memória atualizados**.
