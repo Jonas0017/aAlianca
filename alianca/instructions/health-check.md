@@ -36,6 +36,9 @@ Verifica se o harness está íntegro e coerente com o projeto real. Rode periodi
 - [ ] Nenhum segredo commitado? (ver `security`)
 - [ ] Docs/memória batem com o comportamento atual do código?
 
+**Kernel (dmesg)**
+- [ ] Leu o log do kernel? (`python alianca/kernel/klog.py`) → o kernel está decidindo o esperado? `GATE`/`VERIFY block` recorrente sinaliza atrito real a investigar.
+
 ## Saída — relatório de saúde
 
 ```
