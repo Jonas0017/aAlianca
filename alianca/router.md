@@ -41,7 +41,7 @@ A segurança nunca é sacrificada por estilo ou velocidade. (Estilo/formatação
 | `architecture` | criar/alterar estrutura: novo módulo, camada, fronteira ou dependência | execução | todos | ✅ pronto |
 | `refactor` | detectar duplicação (3x) ou função longa demais | execução | todos | ✅ pronto |
 | `bug-prevention` | escrever código com risco de erro (entrada externa, estado, concorrência) | execução | todos | ✅ pronto |
-| `security` | tocar em auth, dados pessoais, pagamentos ou segredos | execução | R ≥ 40 | ✅ pronto |
+| `security` | tocar em auth, dados pessoais, pagamentos ou segredos | execução | todos (profundidade ∝ risco) | ✅ pronto |
 | `interface` | criar/alterar superfície humana: tela, layout, componente, fluxo, CLI/TUI, texto ou erro de UI | execução | todos | ✅ pronto |
 | `snapshot` | antes de tarefa grande, ou ao concluir um marco | execução | níveis ≥ 1 | ✅ pronto |
 | `migration` | sinais de crescimento/encolhimento cruzam um gatilho (PROTOCOL §5) | evolução | todos | ✅ pronto |

@@ -1,5 +1,6 @@
 ---
 trigger: decidir dividir trabalho entre vários agentes/especialistas (nível ≥ 3, tarefa grande com frentes paralelas independentes, ou revisão independente)
+keywords: agente, agentes, subagente, subagentes, especialistas, paralelizar, em paralelo, frentes paralelas, dividir o trabalho, orquestrar
 load-when: execução
 applies-to: níveis ≥ 2 (opcional) · níveis ≥ 3 (recomendado)
 priority: lifecycle (fora da ordem de precedência de código)

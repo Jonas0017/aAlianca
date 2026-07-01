@@ -20,8 +20,16 @@ from pathlib import Path
 # Constantes de contrato
 # ---------------------------------------------------------------------------
 
-VERSION = "3.0"
+# Versao do FORMATO do indice (schema do router.index.json), nao do produto.
+# A versao do produto (Alianca) e lida do alianca/router.md (alianca-version)
+# e emitida como "aliancaVersion".
+INDEX_FORMAT_VERSION = "3.0"
 GENERATED_FROM = "alianca/instructions/*.md"
+
+# Chaves reconhecidas de frontmatter. Uma linha "palavra:" que NAO esteja
+# nesta lista e tratada como CONTINUACAO do valor anterior (ex.: um trigger
+# multi-linha contendo "Nota: ..."), nao como chave nova.
+KNOWN_KEYS = {"trigger", "keywords", "load-when", "applies-to", "priority", "pulls"}
 
 # Ordem de precedência dos módulos de CÓDIGO. O índice nesta lista é a
 # "priority" do módulo. Módulos fora desta lista (ciclo de vida / bootstrap)
@@ -94,8 +102,12 @@ def parse_frontmatter(text):
         if line.strip() == "---":
             closed = True
             break
+        # Chave nova SO se a linha nao esta indentada (o ^ do regex ja exige
+        # comeco em coluna 0) E a chave e CONHECIDA. Senao, uma continuacao
+        # de valor multi-linha que comece com "Palavra:" (ex.: "Nota: ...")
+        # viraria uma chave espuria e truncaria o valor anterior.
         m = re.match(r"^([A-Za-z0-9_-]+)\s*:\s*(.*)$", line)
-        if m:
+        if m and m.group(1).strip().lower() in KNOWN_KEYS:
             current_key = m.group(1).strip()
             fm[current_key] = m.group(2).strip()
         elif current_key is not None and line.strip() != "":
@@ -170,6 +182,31 @@ def compute_priority(name):
 
 
 # ---------------------------------------------------------------------------
+# Versão do produto (lida do alianca/router.md)
+# ---------------------------------------------------------------------------
+
+ROUTER_MD_PATH = ALIANCA_DIR / "router.md"
+
+
+def read_alianca_version():
+    """
+    Versão do produto declarada no alianca/router.md, na linha
+    'alianca-version: X.Y' (dentro de um bloco de código). Parse tolerante:
+    qualquer falha (arquivo ausente, linha ausente) devolve None e o campo
+    é simplesmente omitido do índice.
+    """
+    try:
+        text = ROUTER_MD_PATH.read_text(encoding="utf-8")
+        m = re.search(r"^\s*alianca-version\s*:\s*([0-9][\w.\-]*)\s*$",
+                      text, re.MULTILINE)
+        if m:
+            return m.group(1)
+    except Exception:
+        pass
+    return None
+
+
+# ---------------------------------------------------------------------------
 # I/O determinístico (LF, utf-8, sem reescrever se idêntico)
 # ---------------------------------------------------------------------------
 
@@ -209,8 +246,10 @@ def main():
 
         if "keywords" in fm and fm["keywords"].strip():
             keywords = parse_explicit_keywords(fm["keywords"])
+            keywords_derived = False
         else:
             keywords = derive_keywords(trigger)
+            keywords_derived = True
 
         load_when = fm.get("load-when", "").strip()
 
@@ -227,16 +266,24 @@ def main():
             "loadWhen": load_when,
             "priority": compute_priority(name),
         }
+        if keywords_derived:
+            # Keywords DERIVADAS do trigger sao ruidosas por natureza (prosa
+            # vira roteador). O route.py exige forca minima 2 para modulos
+            # marcados assim; keywords curadas mantem forca 1.
+            entry["keywordsDerived"] = True
         if pulls:
             entry["pulls"] = pulls
         modules[name] = entry
 
     index = {
-        "version": VERSION,
+        "indexFormatVersion": INDEX_FORMAT_VERSION,
         "generatedFrom": GENERATED_FROM,
         "precedence": PRECEDENCE,
         "modules": modules,
     }
+    alianca_version = read_alianca_version()
+    if alianca_version:
+        index["aliancaVersion"] = alianca_version
 
     index_text = json.dumps(
         index, sort_keys=True, indent=2, ensure_ascii=False

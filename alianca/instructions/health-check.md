@@ -1,5 +1,6 @@
 ---
 trigger: revisar a saúde do harness (periódico, ao retomar, ou sob demanda)
+keywords: health-check, health check, healthcheck, saude do harness, diagnostico do harness, revisar o harness, harness integro
 load-when: review
 applies-to: níveis ≥ 2 (recomendado a qualquer nível ao retomar)
 priority: lifecycle (fora da ordem de precedência de código)

@@ -1,5 +1,6 @@
 ---
 trigger: usuário classificado como leigo (P0) — descreve produto/problema, não tecnologia
+keywords: leigo, leiga, persona p0, nao sei programar, nao entendo de codigo, nao sou programador, sem conhecimento tecnico
 load-when: bootstrap + execução
 applies-to: P0 (e parcialmente P1)
 priority: transversal (rege toda a comunicação com este usuário)

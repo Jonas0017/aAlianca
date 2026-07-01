@@ -27,6 +27,7 @@ Uso:
     python selftest.py        # exit 0 se tudo passa; != 0 no primeiro fracasso
 """
 
+import importlib.util
 import io
 import json
 import os
@@ -34,6 +35,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
+from datetime import datetime, timezone
 
 # stdout utf-8 (Windows costuma vir cp1252; os textos tem acento).
 try:
@@ -158,6 +161,101 @@ def test_route():
           "Carregue ANTES de agir" not in ctx and "  * " not in ctx, ctx)
     check("route/base: sem coordenador",
           COORD not in ctx, ctx)
+
+
+# ===========================================================================
+# 1b) route.py — CALIBRACAO (prompts REAIS que geraram falso positivo)
+# ===========================================================================
+def test_route_calibration():
+    # Os 3 prompts ruidosos vieram de uma sessao real (kernel.log). Cada um
+    # roteava modulos errados por keyword DERIVADA generica ('revisao', 'mas',
+    # 'multi', 'tarefa') ou keyword curada frouxa ('estrutura', 'todo').
+
+    # (1) "revisao completa do projeto" -> SO x9 (auditoria). Antes puxava
+    #     agents ('revisao' derivada do trigger de agents) e outros.
+    ctx = route_context("faz uma revisão completa desse projeto")
+    check("calib/revisao-completa: x9 roteado", "x9 -> " in ctx, ctx)
+    for spurio in ("agents", "adopt", "security", "bug-prevention",
+                   "testing", "snapshot"):
+        check("calib/revisao-completa: sem {0} (falso positivo)".format(spurio),
+              spurio + " -> " not in ctx, ctx)
+
+    # (2) pedido de parecer/analise -> nada ou x9. Antes: architecture
+    #     ('estrutura'), adopt ('mas'!), agents ('revisao').
+    ctx = route_context(
+        "ok, vc tá fazendo uma revisão seguindo a estrutura atual do projeto "
+        "seguindo as regras, mas eu quero uma análise mais completa e um "
+        "parecer seu, pontos de melhoria, ajustes, coisas que podemos "
+        "melhorar nesse projeto")
+    for spurio in ("architecture", "adopt", "agents"):
+        check("calib/parecer: sem {0} (falso positivo)".format(spurio),
+              spurio + " -> " not in ctx, ctx)
+
+    # (3) "multiplos agentes" -> agents (x9 aceitavel). Antes: snapshot
+    #     ('multi' derivada) e x9 via 'todo' casando 'todos'.
+    ctx = route_context(
+        "pode atacar todos juntos, corrija tudo de uma vez com multiplos agentes")
+    check("calib/multiplos-agentes: agents roteado", "agents -> " in ctx, ctx)
+    check("calib/multiplos-agentes: sem snapshot (falso positivo 'multi')",
+          "snapshot -> " not in ctx, ctx)
+
+    # Matches LEGITIMOS que a calibracao NAO pode quebrar.
+    ctx = route_context("tem senha hardcoded aqui?")
+    check("calib/senha-hardcoded: security roteado", "security -> " in ctx, ctx)
+
+    ctx = route_context("escreve testes pra essa função")
+    check("calib/escreve-testes: testing roteado", "testing -> " in ctx, ctx)
+
+    ctx = route_context("cria uma tarefa pra isso")
+    check("calib/cria-tarefa: tasks roteado", "tasks -> " in ctx, ctx)
+    check("calib/cria-tarefa: sem agents/snapshot (falso positivo 'tarefa')",
+          "agents -> " not in ctx and "snapshot -> " not in ctx, ctx)
+
+    ctx = route_context("audita as pontas soltas")
+    check("calib/audita-pontas: x9 roteado", "x9 -> " in ctx, ctx)
+
+    ctx = route_context("divide esse trabalho entre agentes")
+    check("calib/divide-agentes: agents roteado", "agents -> " in ctx, ctx)
+
+
+# ===========================================================================
+# 1c) select_modules — forca minima 2 para keywords DERIVADAS (anti-ruido)
+# ===========================================================================
+_DERIVED_MIN2_SRC = r'''
+import json, os, sys
+sys.path.insert(0, os.environ["ALIANCA_KERNEL_DIR"])
+import route
+idx = {"modules": {
+    "derivado": {"file": "instructions/derivado.md", "trigger": "t",
+                 "keywords": ["alpha", "beta"], "keywordsDerived": True,
+                 "priority": None},
+    "curado": {"file": "instructions/curado.md", "trigger": "t",
+               "keywords": ["alpha"], "priority": None},
+}}
+out = {}
+for prompt in ("quero alpha", "quero alpha e beta"):
+    tokens = route.tokenize(prompt)
+    norm = route.strip_accents(prompt)
+    sel = route.select_modules(idx, tokens, norm)
+    out[prompt] = sorted(n for (n, _m, _s) in sel)
+sys.stdout.write(json.dumps(out))
+'''
+
+
+def test_derived_min_strength():
+    env = dict(os.environ)
+    env["ALIANCA_KERNEL_DIR"] = HERE
+    proc = subprocess.run([PY, "-c", _DERIVED_MIN2_SRC],
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+    if proc.returncode != 0:
+        _fail("route/derivado-min2",
+              "exit!=0: {0}".format(proc.stderr.decode("utf-8", "replace")[:300]))
+    out = json.loads(proc.stdout.decode("utf-8", "replace"))
+    check("route/derivado-min2: 1 keyword derivada NAO seleciona (curada sim)",
+          out["quero alpha"] == ["curado"], "sel={0}".format(out))
+    check("route/derivado-min2: 2 keywords derivadas selecionam",
+          out["quero alpha e beta"] == ["curado", "derivado"],
+          "sel={0}".format(out))
 
 
 # ===========================================================================
@@ -327,6 +425,169 @@ def test_verify():
 
 
 # ===========================================================================
+# 4b) verify.py — portao PERSISTIR (5o passo do loop, em layout isolado)
+# ===========================================================================
+def _iso_now():
+    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace(
+        "+00:00", "Z")
+
+
+def _write_persist_transcript(dirp, project_writes, memory_writes=1):
+    """Transcript sintetico: user + assistant com tool_use de escrita."""
+    blocks = [{"type": "text", "text": "Editando os arquivos do projeto."}]
+    for i in range(project_writes):
+        blocks.append({"type": "tool_use", "name": "Edit" if i % 2 == 0 else "Write",
+                       "input": {"file_path": os.path.join(dirp, "src", "mod{0}.py".format(i))}})
+    for i in range(memory_writes):
+        # Escrita em alianca/memory/ NAO conta como trabalho a persistir.
+        blocks.append({"type": "tool_use", "name": "Edit",
+                       "input": {"file_path": os.path.join(
+                           dirp, "alianca", "memory", "nota{0}.md".format(i))}})
+    ts = _iso_now()
+    eventos = [
+        {"type": "user", "timestamp": ts, "message": {"content": "faz ai"}},
+        {"type": "assistant", "timestamp": ts, "message": {"content": blocks}},
+    ]
+    tp = os.path.join(dirp, "transcript.jsonl")
+    with open(tp, "w", encoding="utf-8") as f:
+        for evt in eventos:
+            f.write(json.dumps(evt, ensure_ascii=False) + "\n")
+    return tp
+
+
+def _run_persist_case(project_writes, active_context, active_age_s,
+                      stop_hook_active=False):
+    """
+    Monta um layout isolado tdir/kernel/verify.py + tdir/memory/ e roda o
+    Stop hook. active_context=False -> memoria nao inicializada.
+    active_age_s -> idade do mtime do active-context.md (segundos atras).
+    Devolve (exit_code, stdout).
+    """
+    tdir = tempfile.mkdtemp(prefix="alianca_persist_")
+    try:
+        kdir = os.path.join(tdir, "kernel")
+        os.makedirs(kdir)
+        shutil.copy(VERIFY, os.path.join(kdir, "verify.py"))
+        shutil.copy(KLOG, os.path.join(kdir, "klog.py"))
+        # NUNCA copiar o verify.cmd real (recursao). Sem claim no texto,
+        # o portao do claim permite e cai no PERSISTIR.
+        if active_context:
+            mdir = os.path.join(tdir, "memory")
+            os.makedirs(mdir)
+            ac = os.path.join(mdir, "active-context.md")
+            with open(ac, "w", encoding="utf-8") as f:
+                f.write("# contexto\n")
+            old = time.time() - active_age_s
+            os.utime(ac, (old, old))
+        transcript = _write_persist_transcript(tdir, project_writes)
+        payload = {"transcript_path": transcript, "cwd": tdir,
+                   "stop_hook_active": stop_hook_active}
+        proc = subprocess.run(
+            [PY, os.path.join(kdir, "verify.py")],
+            input=json.dumps(payload).encode("utf-8"),
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        )
+        return proc.returncode, proc.stdout.decode("utf-8", "replace")
+    finally:
+        shutil.rmtree(tdir, ignore_errors=True)
+
+
+def test_persist():
+    # (a) Trabalho substancial (2 escritas no projeto) + active-context.md
+    #     VELHO (nao tocado na sessao) -> BLOCK mandando persistir.
+    code, out = _run_persist_case(2, active_context=True, active_age_s=3600)
+    check("persist/escritas+memoria-velha: BLOCK (PERSISTIR pendente)",
+          code == 0 and _is_block(out) and "active-context" in out,
+          "exit={0} stdout={1!r}".format(code, out[:200]))
+
+    # (b) Mesmo cenario com stop_hook_active -> ALLOW (anti-loop SEMPRE).
+    code, out = _run_persist_case(2, active_context=True, active_age_s=3600,
+                                  stop_hook_active=True)
+    check("persist/stop_hook_active: ALLOW (anti-loop)",
+          code == 0 and not _is_block(out),
+          "exit={0} stdout={1!r}".format(code, out[:200]))
+
+    # (c) Sem active-context.md (memoria nao inicializada) -> ALLOW.
+    code, out = _run_persist_case(2, active_context=False, active_age_s=0)
+    check("persist/sem-active-context: ALLOW (memoria nao inicializada)",
+          code == 0 and not _is_block(out),
+          "exit={0} stdout={1!r}".format(code, out[:200]))
+
+    # (d) active-context.md atualizado DURANTE a sessao (mtime fresco) -> ALLOW.
+    code, out = _run_persist_case(2, active_context=True, active_age_s=0)
+    check("persist/memoria-atualizada: ALLOW (persistiu na sessao)",
+          code == 0 and not _is_block(out),
+          "exit={0} stdout={1!r}".format(code, out[:200]))
+
+    # (e) 1 escrita so (< minimo) -> ALLOW (nao e trabalho substancial;
+    #     as escritas em alianca/memory/ do fixture nao contam).
+    code, out = _run_persist_case(1, active_context=True, active_age_s=3600)
+    check("persist/1-escrita: ALLOW (abaixo do minimo de substancial)",
+          code == 0 and not _is_block(out),
+          "exit={0} stdout={1!r}".format(code, out[:200]))
+
+
+# ===========================================================================
+# 4c) klog.py — append + tail + _summary (num log SINTETICO, nunca o real)
+# ===========================================================================
+def test_klog():
+    spec = importlib.util.spec_from_file_location("alianca_klog_test", KLOG)
+    kmod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(kmod)
+
+    tdir = tempfile.mkdtemp(prefix="alianca_klog_")
+    try:
+        kmod.LOG_PATH = os.path.join(tdir, "kernel.log")  # log sintetico
+        kmod.klog("route", "mods=[x9] pulls=[]")
+        kmod.klog("VERIFY", "persist: block\tcom tab e\nquebra")
+        linhas = kmod.tail(10)
+        check("klog: append gravou 2 linhas", len(linhas) == 2,
+              "linhas={0!r}".format(linhas))
+        check("klog: EVENT normalizado em caixa alta",
+              linhas[0].split("\t")[1] == "ROUTE", linhas[0])
+        check("klog: tab/quebra sanitizados no detail (TSV integro)",
+              len(linhas[1].split("\t")) == 3 and "\n" not in linhas[1],
+              linhas[1])
+        check("klog: tail(1) devolve so a ultima",
+              kmod.tail(1) == linhas[-1:], "tail(1)={0!r}".format(kmod.tail(1)))
+        resumo = "\n".join(kmod._summary(10))
+        check("klog: _summary conta os 2 registros e destaca o block",
+              "2 registros" in resumo and "VERIFY block: 1" in resumo, resumo)
+        # Log ausente -> 'sem registros ainda' (fail-open do dmesg).
+        kmod.LOG_PATH = os.path.join(tdir, "inexistente.log")
+        check("klog: _summary com log ausente -> 'sem registros ainda'",
+              kmod._summary(5) == ["sem registros ainda"],
+              "{0!r}".format(kmod._summary(5)))
+    finally:
+        shutil.rmtree(tdir, ignore_errors=True)
+
+
+# ===========================================================================
+# 4d) compile.py — frontmatter: continuacao multi-linha com "Palavra:" no meio
+# ===========================================================================
+def test_frontmatter_multiline():
+    spec = importlib.util.spec_from_file_location("alianca_compile_test", COMPILE)
+    cmod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cmod)
+
+    texto = (
+        "---\n"
+        "trigger: auditar o projeto em busca de pontas soltas.\n"
+        "Nota: esta linha e CONTINUACAO do trigger, nao chave nova\n"
+        "keywords: alpha, beta\n"
+        "---\n"
+        "corpo do modulo\n"
+    )
+    fm = cmod.parse_frontmatter(texto)
+    check("frontmatter: parse ok", isinstance(fm, dict), repr(fm))
+    check("frontmatter: 'Nota:' anexada ao trigger (nao vira chave)",
+          "Nota" not in fm and "CONTINUACAO do trigger" in fm.get("trigger", ""),
+          repr(fm))
+    check("frontmatter: chave conhecida depois da continuacao segue valendo",
+          fm.get("keywords") == "alpha, beta", repr(fm))
+
+
+# ===========================================================================
 # 5) compile.py — idempotente + emite 'pulls' p/ security e refactor
 # ===========================================================================
 def test_compile():
@@ -365,9 +626,14 @@ def main():
     print("== Alianca kernel — selftest (constata, nao mocka) ==")
     print("")
     test_route()
+    test_route_calibration()
+    test_derived_min_strength()
     test_broken_edge()
     test_gate()
     test_verify()
+    test_persist()
+    test_klog()
+    test_frontmatter_multiline()
     test_compile()
     print("")
     print("RESUMO: {0} PASS — kernel verificado.".format(_PASSES))

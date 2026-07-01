@@ -1,5 +1,6 @@
 ---
 trigger: você vai perguntar algo sobre o projeto ao usuário, OU o usuário adiou uma resposta ("responde depois"), OU uma pergunta em aberto foi respondida
+keywords: pergunta, perguntas, responde depois, respondo depois, pergunta em aberto, perguntas abertas, duvida registrada
 load-when: execução
 applies-to: todos os níveis (qualquer nível, sob demanda)
 priority: fora da ordem de precedência — módulo de ciclo de vida (coordena o trabalho, não compete com os módulos de código)

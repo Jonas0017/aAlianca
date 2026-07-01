@@ -1,5 +1,6 @@
 ---
 trigger: a triagem do setup indicou algum eixo ≥ banda 2 (score ≥ 41)
+keywords: triagem, aprofundamento, deep questions, banda 2, eixo critico
 load-when: bootstrap
 applies-to: níveis ≥ 2
 priority: bootstrap (logo após a triagem do setup)

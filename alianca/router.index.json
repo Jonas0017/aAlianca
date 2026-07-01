@@ -1,22 +1,20 @@
 {
+  "aliancaVersion": "2.2",
   "generatedFrom": "alianca/instructions/*.md",
+  "indexFormatVersion": "3.0",
   "modules": {
     "adopt": {
       "file": "instructions/adopt.md",
       "keywords": [
-        "active",
-        "ainda",
-        "alianca",
-        "chegar",
-        "codigo",
-        "context",
-        "docs",
-        "existe",
-        "mas",
-        "memory",
-        "nem",
-        "pasta",
-        "usa"
+        "adocao",
+        "adota",
+        "adotar",
+        "adotar a alianca",
+        "adote",
+        "brownfield",
+        "instalar a alianca",
+        "integrar a alianca",
+        "projeto existente"
       ],
       "loadWhen": "bootstrap",
       "priority": null,
@@ -25,21 +23,16 @@
     "agents": {
       "file": "instructions/agents.md",
       "keywords": [
+        "agente",
         "agentes",
-        "decidir",
-        "dividir",
-        "entre",
+        "dividir o trabalho",
+        "em paralelo",
         "especialistas",
-        "frentes",
-        "grande",
-        "independente",
-        "independentes",
-        "nivel",
-        "paralelas",
-        "revisao",
-        "tarefa",
-        "trabalho",
-        "varios"
+        "frentes paralelas",
+        "orquestrar",
+        "paralelizar",
+        "subagente",
+        "subagentes"
       ],
       "loadWhen": "execução",
       "priority": null,
@@ -56,10 +49,12 @@
         "decisao",
         "dependencia",
         "dependencias",
-        "estrutura",
+        "estrutura de pastas",
+        "estrutura do projeto",
         "fronteira",
         "modulo",
         "modulos",
+        "reestruturar",
         "servico",
         "servicos"
       ],
@@ -117,12 +112,10 @@
     "deep-questions": {
       "file": "instructions/deep-questions.md",
       "keywords": [
-        "algum",
-        "banda",
-        "eixo",
-        "indicou",
-        "score",
-        "setup",
+        "aprofundamento",
+        "banda 2",
+        "deep questions",
+        "eixo critico",
         "triagem"
       ],
       "loadWhen": "bootstrap",
@@ -132,13 +125,13 @@
     "health-check": {
       "file": "instructions/health-check.md",
       "keywords": [
-        "demanda",
-        "harness",
-        "periodico",
-        "retomar",
-        "revisar",
-        "saude",
-        "sob"
+        "diagnostico do harness",
+        "harness integro",
+        "health check",
+        "health-check",
+        "healthcheck",
+        "revisar o harness",
+        "saude do harness"
       ],
       "loadWhen": "review",
       "priority": null,
@@ -170,12 +163,13 @@
     "migration": {
       "file": "instructions/migration.md",
       "keywords": [
-        "crescimento",
-        "cruzam",
-        "encolhimento",
-        "gatilho",
-        "nivel",
-        "sinais"
+        "gatilho de nivel",
+        "migrar de nivel",
+        "mudar de nivel",
+        "nivel do harness",
+        "promover o nivel",
+        "rebaixar o nivel",
+        "subir de nivel"
       ],
       "loadWhen": "evolução",
       "priority": null,
@@ -184,11 +178,13 @@
     "persona-p0": {
       "file": "instructions/persona-p0.md",
       "keywords": [
-        "classificado",
-        "descreve",
+        "leiga",
         "leigo",
-        "tecnologia",
-        "usuario"
+        "nao entendo de codigo",
+        "nao sei programar",
+        "nao sou programador",
+        "persona p0",
+        "sem conhecimento tecnico"
       ],
       "loadWhen": "bootstrap + execução",
       "priority": null,
@@ -197,15 +193,13 @@
     "questions": {
       "file": "instructions/questions.md",
       "keywords": [
-        "aberto",
-        "adiou",
-        "depois",
+        "duvida registrada",
         "pergunta",
-        "perguntar",
-        "responde",
-        "respondida",
-        "resposta",
-        "usuario"
+        "pergunta em aberto",
+        "perguntas",
+        "perguntas abertas",
+        "responde depois",
+        "respondo depois"
       ],
       "loadWhen": "execução",
       "priority": null,
@@ -277,12 +271,13 @@
     "setup": {
       "file": "instructions/setup.md",
       "keywords": [
-        "active",
-        "context",
-        "existe",
-        "iniciar",
-        "memory",
-        "novo"
+        "bootstrap",
+        "comecar do zero",
+        "greenfield",
+        "iniciar um projeto",
+        "novo projeto",
+        "projeto novo",
+        "setup"
       ],
       "loadWhen": "bootstrap",
       "priority": null,
@@ -291,16 +286,14 @@
     "snapshot": {
       "file": "instructions/snapshot.md",
       "keywords": [
-        "antes",
-        "concluir",
-        "etapa",
-        "fica",
-        "grande",
-        "longa",
-        "marco",
-        "multi",
-        "sessao",
-        "tarefa"
+        "marco concluido",
+        "ponto de retomada",
+        "retomada",
+        "retomar o projeto",
+        "salvar o contexto",
+        "sessao longa",
+        "snapshot",
+        "snapshots"
       ],
       "loadWhen": "execução",
       "priority": null,
@@ -309,14 +302,14 @@
     "tasks": {
       "file": "instructions/tasks.md",
       "keywords": [
-        "declarar",
-        "entre",
-        "estados",
-        "mover",
-        "nova",
-        "pronto",
-        "sobretudo",
-        "tarefa"
+        "backlog",
+        "kanban",
+        "marcar como pronto",
+        "mover tarefa",
+        "quadro de tarefas",
+        "tarefa",
+        "tarefas",
+        "task"
       ],
       "loadWhen": "execução",
       "priority": null,
@@ -351,11 +344,12 @@
     "x9": {
       "file": "instructions/x9.md",
       "keywords": [
+        "audita",
         "auditar",
         "auditoria",
         "beco",
         "conectar",
-        "dead",
+        "dead code",
         "falta",
         "faltando",
         "fixme",
@@ -376,7 +370,6 @@
         "revisao",
         "solta",
         "soltas",
-        "todo",
         "verificar",
         "vigiar"
       ],
@@ -393,6 +386,5 @@
     "refactor",
     "interface",
     "code-quality"
-  ],
-  "version": "3.0"
+  ]
 }

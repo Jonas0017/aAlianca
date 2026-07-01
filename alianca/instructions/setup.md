@@ -1,5 +1,6 @@
 ---
 trigger: iniciar um projeto novo (não existe memory/active-context.md)
+keywords: setup, bootstrap, greenfield, projeto novo, novo projeto, comecar do zero, iniciar um projeto
 load-when: bootstrap
 applies-to: todas as personas
 priority: bootstrap (roda antes de qualquer execução)

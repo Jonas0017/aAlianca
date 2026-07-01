@@ -1,5 +1,6 @@
 ---
 trigger: antes de uma tarefa grande/multi-etapa, ao concluir um marco, ou quando a sessão fica longa
+keywords: snapshot, snapshots, retomada, ponto de retomada, marco concluido, retomar o projeto, salvar o contexto, sessao longa
 load-when: execução
 applies-to: níveis ≥ 1
 priority: lifecycle (fora da ordem de precedência de código)

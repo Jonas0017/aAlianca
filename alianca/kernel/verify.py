@@ -121,6 +121,152 @@ def last_assistant_text(transcript_path):
     return last
 
 
+# --- PERSISTIR (5o passo do loop): trabalho substancial exige memoria -----
+#
+# O loop e CHECAR -> CARREGAR -> AGIR -> VERIFICAR -> PERSISTIR. Os passos
+# 1-4 ja tem enforcement; este bloco fecha o 5o: se o turno fez trabalho
+# substancial de ESCRITA no projeto (Edit/Write/NotebookEdit no transcript,
+# ignorando escritas em alianca/memory/) e alianca/memory/active-context.md
+# NAO foi tocado durante a sessao (mtime < timestamp do 1o evento do
+# transcript), o Stop bloqueia 1x mandando persistir. Anti-loop garantido
+# pelo stop_hook_active (checado antes, no main). Fail-open em tudo.
+
+MEMORY_ACTIVE = os.path.join(os.path.dirname(HERE), "memory", "active-context.md")
+WRITE_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
+# "Substancial" = pelo menos N usos de ferramenta de escrita no projeto.
+# 1 edit trivial nao obriga a persistir; 2+ ja e trabalho que merece memoria.
+PERSIST_MIN_WRITES = 2
+# Folga p/ granularidade de mtime do filesystem (FAT arredonda a 2s).
+MTIME_SLACK_S = 2.0
+
+
+def _iso_to_epoch(ts):
+    """ISO8601 (com ou sem 'Z'/offset) -> epoch. None se nao parsear."""
+    try:
+        from datetime import datetime
+        s = str(ts).strip()
+        if not s:
+            return None
+        if s.endswith("Z"):
+            s = s[:-1] + "+00:00"
+        dt = datetime.fromisoformat(s)
+        # Naive -> assume hora local (mesmo relogio do mtime). Aware -> exato.
+        return dt.timestamp()
+    except Exception:
+        return None
+
+
+def _is_project_write(path, cwd):
+    """
+    True se o caminho escrito conta como 'arquivo do projeto':
+      - escritas em alianca/memory/ NAO contam (persistir memoria e o remedio,
+        nao o sintoma);
+      - caminho absoluto FORA do cwd do projeto nao conta (temp/scratch).
+    """
+    if not path:
+        return False
+    low = str(path).replace("\\", "/").lower()
+    if "alianca/memory/" in low:
+        return False
+    try:
+        if cwd and os.path.isabs(path):
+            c = os.path.normcase(os.path.abspath(cwd))
+            p = os.path.normcase(os.path.abspath(path))
+            if p != c and not p.startswith(c.rstrip("\\/") + os.sep):
+                return False
+    except Exception:
+        pass  # em duvida, conta como do projeto (o gate ainda e fail-open)
+    return True
+
+
+def _scan_transcript_writes(transcript_path, cwd):
+    """
+    Varre o transcript .jsonl uma vez e devolve (writes, session_start):
+      writes        -> quantos tool_use de escrita em arquivos do projeto;
+      session_start -> epoch do PRIMEIRO evento com timestamp parseavel
+                       (inicio da sessao), ou None.
+    """
+    writes = 0
+    session_start = None
+    with open(transcript_path, "r", encoding="utf-8", errors="replace") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                evt = json.loads(line)
+            except Exception:
+                continue
+            if not isinstance(evt, dict):
+                continue
+            if session_start is None:
+                session_start = _iso_to_epoch(evt.get("timestamp"))
+            message = evt.get("message")
+            if not isinstance(message, dict):
+                continue
+            content = message.get("content")
+            if not isinstance(content, list):
+                continue
+            for block in content:
+                if not isinstance(block, dict):
+                    continue
+                if block.get("type") != "tool_use":
+                    continue
+                if block.get("name") not in WRITE_TOOLS:
+                    continue
+                tin = block.get("input")
+                tin = tin if isinstance(tin, dict) else {}
+                path = tin.get("file_path") or tin.get("notebook_path") or ""
+                if _is_project_write(path, cwd):
+                    writes += 1
+    return writes, session_start
+
+
+def persist_reason(payload):
+    """
+    Portao PERSISTIR. Retorna a razao de bloqueio (str) ou None (permitir).
+    So constata: nunca levanta para o chamador alem do try do main.
+    """
+    transcript_path = payload.get("transcript_path")
+    if not transcript_path or not os.path.isfile(transcript_path):
+        return None  # sem transcript nao ha como constatar -> fail-open
+
+    # (c) Sem memoria inicializada -> nada a exigir. ALLOW logado.
+    if not os.path.isfile(MEMORY_ACTIVE):
+        klog("VERIFY", "persist: allow sem active-context.md (memoria nao inicializada)")
+        return None
+
+    writes, session_start = _scan_transcript_writes(
+        transcript_path, payload.get("cwd"))
+
+    if writes < PERSIST_MIN_WRITES:
+        klog("VERIFY", "persist: allow writes={} (< {}: sem trabalho substancial)".format(
+            writes, PERSIST_MIN_WRITES))
+        return None
+
+    if session_start is None:
+        klog("VERIFY", "persist: allow fail-open (transcript sem timestamp)")
+        return None
+
+    try:
+        mtime = os.path.getmtime(MEMORY_ACTIVE)
+    except Exception:
+        klog("VERIFY", "persist: allow fail-open (mtime ilegivel)")
+        return None
+
+    if mtime >= session_start - MTIME_SLACK_S:
+        klog("VERIFY", "persist: allow active-context.md atualizado na sessao (writes={})".format(writes))
+        return None
+
+    klog("VERIFY", "persist: block writes={} sem atualizar active-context.md".format(writes))
+    return (
+        "PERSISTIR pendente: este turno editou {} arquivo(s) do projeto mas "
+        "alianca/memory/active-context.md nao foi atualizado nesta sessao. "
+        "Atualize o active-context.md (o que mudou / proximo passo) antes de "
+        "encerrar."
+    ).format(writes)
+
+
 # --- Constatacao (roda o comando de verificacao) --------------------------
 
 def read_verify_cmd():
@@ -159,7 +305,7 @@ def cmd_runnable(cmd):
         return False
     if any(op in cmd for op in ("&&", "||", "|", ">", "<", ";", "&")):
         return True  # compound: deixa o shell resolver
-    first = re.split(r"\s+", cmd, 1)[0].strip('"').strip("'")
+    first = re.split(r"\s+", cmd, maxsplit=1)[0].strip('"').strip("'")
     if first.lower() in _SHELL_BUILTINS:
         return True
     return shutil.which(first) is not None
@@ -219,62 +365,86 @@ def main():
         klog("VERIFY", "fail-open: transcript ilegivel ({})".format(type(e).__name__))
         return 0
 
-    # Sem alegacao de conclusao -> nada a constatar. PERMITIR.
-    if not has_completion_claim(msg):
-        klog("VERIFY", "no-claim: allow")
-        return 0
-
     # 3) Valvula de escape logada (o "sudo"): [verify:skip <razao>].
+    #    Vale para os DOIS portoes deste hook (claim e PERSISTIR).
     m = OVERRIDE_RE.search(msg or "")
     if m:
         razao = (m.group(1) or "").strip() or "(sem razao)"
         klog("VERIFY", "OVERRIDE razao={}".format(razao))
         return 0
 
-    # 4) CONSTATA: procurar comando de verificacao configurado.
+    # 4/5) Portao 1 — CLAIM: alegou "pronto"? Entao constata com verify.cmd.
+    #      Todo caminho de PERMITIR cai para o portao PERSISTIR abaixo
+    #      (checagem ADICIONAL); so o BLOCK encerra aqui.
+    reason = _claim_reason(msg, payload)
+    if reason:
+        return _block(reason)
+
+    # 6) Portao 2 — PERSISTIR (5o passo do loop). Fail-open em qualquer erro.
+    try:
+        reason = persist_reason(payload)
+    except Exception as e:
+        klog("VERIFY", "persist: allow fail-open ({})".format(type(e).__name__))
+        reason = None
+    if reason:
+        return _block(reason)
+    return 0
+
+
+def _claim_reason(msg, payload):
+    """
+    Portao do CLAIM (logica original, intacta): se a ultima mensagem alega
+    conclusao, roda o verify.cmd e devolve a razao de bloqueio quando a
+    verificacao FALHA. Devolve None em todo caminho de permitir (fail-open).
+    """
+    # Sem alegacao de conclusao -> nada a constatar. PERMITIR.
+    if not has_completion_claim(msg):
+        klog("VERIFY", "no-claim: allow")
+        return None
+
+    # CONSTATA: procurar comando de verificacao configurado.
     try:
         cmd = read_verify_cmd()
     except Exception as e:
         klog("VERIFY", "fail-open: verify.cmd ilegivel ({})".format(type(e).__name__))
-        return 0
+        return None
 
-    # 5b) Sem comando -> NAO ha como constatar. O portao so BLOQUEIA quando
-    #     CONSTATA uma falha (constata, nao pergunta). Sem verify.cmd o
-    #     enforcement e opt-in por projeto: PERMITIR. (Ligue configurando
-    #     alianca/kernel/verify.cmd com o comando de teste/lint do projeto.)
+    # Sem comando -> NAO ha como constatar. O portao so BLOQUEIA quando
+    # CONSTATA uma falha (constata, nao pergunta). Sem verify.cmd o
+    # enforcement e opt-in por projeto: PERMITIR. (Ligue configurando
+    # alianca/kernel/verify.cmd com o comando de teste/lint do projeto.)
     if not cmd:
         klog("VERIFY", "sem verify.cmd: allow (enforcement opt-in)")
-        return 0
+        return None
 
-    # 5c) Verificador nao executavel (infra quebrada) != trabalho errado.
-    #     Nao da pra constatar -> PERMITIR (nunca trancar por infra).
+    # Verificador nao executavel (infra quebrada) != trabalho errado.
+    # Nao da pra constatar -> PERMITIR (nunca trancar por infra).
     if not cmd_runnable(cmd):
         klog("VERIFY", "fail-open: verificador nao executavel cmd='{}'".format(cmd))
-        return 0
+        return None
 
-    # 4/5a) Rodar o comando e observar o exit code REAL.
+    # Rodar o comando e observar o exit code REAL.
     try:
         code, out = run_verification(cmd, payload.get("cwd"))
     except subprocess.TimeoutExpired:
         # Nao conseguimos constatar em tempo habil -> nunca trancar.
         klog("VERIFY", "fail-open: timeout cmd='{}'".format(cmd))
-        return 0
+        return None
     except Exception as e:
         klog("VERIFY", "fail-open: erro ao rodar cmd='{}' ({})".format(cmd, type(e).__name__))
-        return 0
+        return None
 
     if code == 0:
         klog("VERIFY", "cmd='{}' PASS".format(cmd))
-        return 0
+        return None
 
-    # 5a) Constatou FALHA. BLOQUEAR com a saida real (tail).
+    # Constatou FALHA. BLOQUEAR com a saida real (tail).
     klog("VERIFY", "cmd='{}' FAIL exit={}".format(cmd, code))
-    reason = (
+    return (
         "Verificacao falhou (constatado): {} exit={}. "
         "Corrija e rode de novo. Saida:\n{}\n"
         "(Override consciente: inclua [verify:skip motivo].)"
     ).format(cmd, code, _tail(out))
-    return _block(reason)
 
 
 if __name__ == "__main__":

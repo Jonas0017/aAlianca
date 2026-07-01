@@ -1,4 +1,4 @@
-# Snapshot / Handoff — Projeto Aliança — 2026-06-08
+# Snapshot / Handoff — Projeto Aliança — 2026-07-01
 
 > Ponto de retomada autossuficiente. Abra uma nova sessão e diga: **"continue a partir do HANDOFF.md"**. Tudo que você precisa para continuar está aqui.
 
@@ -6,57 +6,64 @@
 
 Construir a **Aliança** — um *gerador de harness* adaptativo e **model-agnostic** (qualquer LLM + outras ferramentas) que serve de base para qualquer projeto de qualquer dev. Não é um harness único: produz estruturas diferentes conforme a **persona** (P0 leigo → P3 time/org) e a **stack**. Slogan: "o elo que liga os dois mundos".
 
-Princípios-chave: dimensionamento **multi-eixo** (Estrutura/Longevidade/Risco) com rubrica determinística; **backbone inegociável** (testes, qualidade, refatoração, prevenção de bugs); carregamento **just-in-time** de instruções por gatilho; **estado em disco** (memória/snapshots), não em % de contexto.
+Princípios-chave: dimensionamento **multi-eixo** (Estrutura/Longevidade/Risco) com rubrica determinística; **backbone inegociável** (testes, qualidade, refatoração, prevenção de bugs); carregamento **just-in-time** de instruções por gatilho; **estado em disco** (memória/snapshots), não em % de contexto; e, desde a fase kernel, **enforce → observe → prove**: o que é crítico migra de prosa (advisory) para portão determinístico (enforcement).
 
 ## Decisões travadas
 
 - **Nome do produto:** Aliança. Edições comerciais: Start (P0/P1), Pro (P2), Org (P3).
-- **Nomenclatura simples** (usuário rejeitou nomes poéticos): `START-HERE.md`, `router.md`, `instructions/`, `memory/`, `snapshots/`; instrução `setup` (bootstrap); `agents`, `coordinator`, `health-check`.
-- **Formato de entrega:** pasta-referência em `.md` puro (model-agnostic).
-- **Sem `stacks/` (decisão 2.1).** Sugerir ferramentas é trabalho da LLM, não do harness — catálogo `.md` seria redundante, inflaria contexto e apodreceria. A stack é **decidida no `setup`** e **registrada por projeto** em `memory/stack.md` (molde genérico que se adapta ao projeto do dev final). Tudo que a Aliança cria deve ser genérico e adaptável.
+- **Nomenclatura simples** (usuário rejeitou nomes poéticos): `START-HERE.md`, `router.md`, `instructions/`, `memory/`, `snapshots/`, `kernel/`; instrução `setup` (bootstrap); `agents`, `coordinator`, `health-check`, `x9`.
+- **Formato de entrega:** pasta-referência em `.md` puro (model-agnostic) + microkernel Python opcional (hoje só Claude Code).
+- **Sem `stacks/` (decisão 2.1).** Sugerir ferramentas é trabalho da LLM, não do harness. A stack é **decidida no `setup`** e **registrada por projeto** em `memory/stack.md`.
+- **Segurança proporcional ao risco, não corte em R≥40** (§16.4): qualquer sinal sensível engaja o `security`; a profundidade acompanha R.
+- **Posicionamento honesto "Claude Code first":** a estrutura `.md` é model-agnostic (validada — ver `VALIDATION.md`), mas o **forcing function determinístico** (kernel de hooks) hoje existe só para Claude Code; nas demais ferramentas o harness roda em modo advisory (prosa). Adapters determinísticos = roadmap.
 - Idioma de trabalho: PT-BR.
 
 ## Estrutura atual no disco
 
 ```
 harness ai/
-├─ PROTOCOL.md            ← teoria/spec completa (16 seções)
+├─ README.md              ← visão geral + posicionamento honesto
+├─ PROTOCOL.md            ← teoria/spec completa (17 seções, §0–§16)
 ├─ HANDOFF.md             ← este arquivo
+├─ VALIDATION.md          ← 2 rounds de validação prática
+├─ CLAUDE.md              ← kernel sempre-carregado (a receita aplicada ao próprio repo)
 └─ alianca/               ← implementação de referência
    ├─ START-HERE.md       ← ponto de entrada do LLM
-   ├─ router.md           ← índice de 15 instruções + gatilhos + precedência
-   ├─ instructions/       ← TODAS as 15 prontas ✅
+   ├─ router.md           ← índice de 18 instruções + gatilhos + precedência
+   ├─ router.index.json   ← índice compilado (gerado por kernel/compile.py; grafo `pulls`)
+   ├─ instructions/       ← TODAS as 18 prontas ✅
    │   setup · adopt · deep-questions · persona-p0 · testing · code-quality · architecture ·
-   │   refactor · bug-prevention · security · interface · snapshot · migration · health-check · agents
-   ├─ memory/README.md    ← documenta vision, active-context, stack.md, decisions…
-   └─ snapshots/README.md
+   │   refactor · bug-prevention · security · interface · tasks · questions · snapshot ·
+   │   migration · health-check · x9 · agents
+   ├─ kernel/             ← microkernel cognitivo (Claude Code)
+   │   route.py (UserPromptSubmit) · gate.py (PreToolUse) · verify.py (Stop) ·
+   │   klog.py + kernel.log · compile.py · selftest.py · settings.snippet.json · verify.cmd
+   ├─ memory/             ← memória do próprio desenvolvimento (active-context, x9-state)
+   └─ snapshots/
 ```
 
 > A **stack não tem pasta**: `memory/stack.md` é gerado por projeto no `setup` (decisão 2.1).
 
 ## Estado (o que está pronto)
 
-- ✅ **Fase 1** — espinha operacional (START-HERE, router, estrutura de pastas).
-- ✅ **Fase 2** — `setup` (questionário progressivo por persona + rubrica 3 eixos + cálculo de nível) e `deep-questions`.
-- ✅ **Fase 3** — backbone (`testing`, `code-quality`, `refactor`, `bug-prevention`, `security`) + `persona-p0`.
-- ✅ **Fase 3b** — instruções de sistema (`snapshot`, `migration`, `health-check`).
-- ✅ **Fase 4 (revisada → 2.1)** — em vez de "stack packs", a escolha de stack virou responsabilidade da LLM no `setup`, registrada por projeto em `memory/stack.md`. Pasta `stacks/` removida; backbone (`testing`, `code-quality`) re-apontado.
-- ✅ **Revisão de arquitetura (2.1)** — após varredura completa: corrigida a memória mínima por nível (Fix #1); removido token `style` órfão (Fix #3); adicionado **módulo `architecture`** (12ª instrução, invariantes de estrutura, sem catálogo); **loop de feedback** (`memory/feedback.md`); **convenções de versionamento** por nível (setup); **recuperação de desastre** (snapshot). Pendência deliberada: calibrar o gatilho `R≥40` (ex.: "login sozinho" = 25) no dogfood.
-- **Aliança está conceitualmente fechada** — as 15 instruções existem e estão registradas no router.
-- ✅ **2.2 (2026-06-10)** — três adições: (1) módulo **`interface`** (design, ergonomia, acessibilidade — a superfície humana, lacuna do backbone); (2) caminho brownfield **`adopt`** (integrar a Aliança a projetos que já existem: inventário em vez de questionário, persona/nível inferidos da realidade, **migração da memória antiga** para fonte única — adoção é integração/"abraço", não substituição); (3) **forcing function "sempre ligado"** (`setup` Passo 8 + §13): o harness deixa de ser passivo — em Claude Code, kernel no `CLAUDE.md` + hook `UserPromptSubmit` (determinístico) fazem todo prompt passar pelo roteamento sem o usuário precisar lembrar. Invariante novo: **uma só memória de projeto ativa**.
-- ✅ **Auto-revisão (2026-06-08)** — corrigida coerência (token `style` órfão, snapshot só a partir do Nível 1, headers de precedência alinhados ao router); completude entregue (B3 separação de ambientes, D3 observabilidade, migração de versão da Aliança, DoD por tarefa via `TASKS.md`, §15 com status); e o **módulo novo `agents`** (quando usar múltiplos agentes). As regras de operação da memória (quando quebrar/consolidar/arquivar) ficaram consolidadas em `memory/README.md` — sem módulo separado, para não colidir com a pasta `memory/`. Pendência deliberada mantida: calibrar o gatilho `R≥40` no dogfood (login=25, pagamentos=30 e regulado=35 ficam abaixo do limiar).
-- ✅ **Passe "menos é mais" (2026-06-08)** — sob a régua *arquiteto, não construtor*: enxugado `security` (catálogo OWASP → invariantes), removida a tabela duplicada em `agents` (vira ponteiro p/ §11) e a anti-alucinação repetida em `bug-prevention`; molde de `stack.md` sem viés de ferramenta; `deep-questions` (Risco) sem cardápio de siglas; `snapshots/README` virou ponteiro p/ a instrução. Coerência: `coordinator` unificado (§11), `business-rules`/`security`/`decisions` movidos de `docs/` para `memory/` (Nível 3), gatilho de migração 2→3 corrigido (memória mínima já tem 2 docs), reversibilidade do bootstrap explícita (P0/F2), Nível 0 "invisível" honesto (roda no VERIFICAR).
-- ✅ **Modelo de nível e risco (2026-06-08, decisões do usuário)** — §16.2/§16.4/§16.5 fechadas. (1) O nível do `setup` é **estimativa inicial**, não veredito: o harness observa o comportamento real e **reajusta** (sobe/rebaixa) via `migration`/`health-check`; longevidade alta sozinha não infla estrutura. (2) Segurança **proporcional ao risco** (não corte em R≥40): qualquer sinal sensível engaja a base e é **sugerido** ao usuário; `.env` obrigatório sempre que houver credencial; o harness **valida** as boas práticas, não reensina. (3) P0: o LLM **confirma cada decisão estrutural** e pergunta melhor na linguagem do leigo — não assume. (4) Idioma dos artefatos segue o usuário (a LLM já faz). O calibre fino dos pesos segue evoluindo no uso real (sem projeto-exemplo no repo, por decisão).
+- ✅ **Fases 1–4 + revisões 2.1/2.2** — espinha operacional, `setup`/`adopt`, backbone completo, instruções de sistema, módulo `interface`, forcing function "sempre ligado". Histórico detalhado no git (commits até 2026-06-10) e no PROTOCOL §15.
+- ✅ **18 instruções prontas** — as 15 originais + `tasks` (4 estados de tarefa), `questions` (perguntas por tópico) e `x9` ("Rei das Pontas Soltas": auditoria de coisas criadas/prometidas pela metade, com modo monitor e estado em `memory/x9-state.md`).
+- ✅ **Microkernel cognitivo operacional (Claude Code)** — 3 portões determinísticos de hook:
+  1. `route.py` (`UserPromptSubmit`) — casa o prompt contra `router.index.json` e injeta quais módulos carregar (roteamento determinístico, não depende do modelo ler o router); injeta também o contexto necessário não-dito via grafo `pulls`.
+  2. `gate.py` (`PreToolUse`) — portão de segurança antes de ferramentas.
+  3. `verify.py` (`Stop`) — 3º portão: bloco Verification, impede declarar pronto sem observar.
+  Suporte: `klog.py` grava `kernel.log` (dmesg do harness, observável); `compile.py` gera o `router.index.json` (com grafo `pulls`); `selftest.py` com **24 PASS**; `settings.snippet.json` + `verify.cmd` para instalação/verificação.
+- ✅ **Validação — 2 rounds em `VALIDATION.md`:** (1) A/B com vs sem harness em duas LLMs (Claude e Copilot, 2026-06-08) — harness ganha em testes/memória/estrutura/segurança registrada, model-agnostic confirmado; (2) kernel + Ollama local (`qwen2.5-coder:7b`, 2026-07-01) — o contexto injetado virou a chave do defeito nº1 (senha em texto puro → bcrypt) num modelo 7B.
+- ✅ **Auditoria X9 + parecer de arquiteto (2026-07-01)** — aprovaram correções, todas aplicadas: contagens/precedência/R≥40 corrigidos nos docs, README reposicionado honesto, `CLAUDE.md` da raiz criado (a Aliança aplicando a própria receita), memória do repo iniciada (`alianca/memory/active-context.md` + `x9-state.md`).
 
 ## Próximos passos (em ordem)
 
-1. **Fase 5 — dogfood:** rodar o `setup` num projeto-exemplo real, ver se a rubrica dá um nível sensato, validar a geração de `memory/stack.md` e **calibrar os pesos** (§4 do PROTOCOL).
-2. Pendências menores: validar travessia router→instruções com o `health-check`; conferir que nenhuma instrução ainda referencia `stacks/`.
+1. **Dogfood real:** usar a Aliança para construir um projeto de verdade por 2–3 semanas — é o que valida rubrica, memória e kernel sob uso contínuo (não só em teste pontual).
+2. **Calibrar o roteador** com dados do `kernel.log`: quais gatilhos casam, quais módulos são injetados e ignorados, falsos positivos/negativos das keywords.
+3. **Empacotar como plugin do Claude Code:** resolve instalação, update e o snippet de settings de uma vez (hoje a instalação é manual via `settings.snippet.json`).
 
 ## Como retomar
 
 1. Leia este HANDOFF.md.
-2. Leia `alianca/START-HERE.md` e `alianca/router.md` para o modelo mental.
-3. Comece pela Fase 5 (dogfood): rode o `setup` num projeto-exemplo e observe se a rubrica e o `memory/stack.md` saem coerentes.
-
-> A memória persistente (`MEMORY.md` + `projeto-keel-harness-universal.md` no diretório de memória) também reflete este estado.
+2. Leia `alianca/START-HERE.md` e `alianca/router.md` para o modelo mental; `alianca/memory/active-context.md` tem o estado corrente.
+3. Rode `alianca/kernel/selftest.py` para confirmar o kernel (esperado: 24 PASS) e comece o passo 1 (dogfood real).

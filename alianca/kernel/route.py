@@ -229,6 +229,11 @@ def select_modules(index, tokens, norm_prompt):
     match especifico (tasks casa 'tarefa'+'nova') vence um match generico
     (architecture casa so 'nova'), sem precisar curar keyword.
 
+    CALIBRACAO ANTI-RUIDO: modulo cujas keywords foram DERIVADAS do trigger
+    pelo compile.py (meta["keywordsDerived"] == true) exige forca minima 2 —
+    keywords derivadas de prosa sao genericas ("revisao", "mas", "multi") e
+    uma unica coincidencia nao e sinal. Keywords CURADAS mantem forca 1.
+
     Ordem: security sempre primeiro se casou (invariante de seguranca: nunca
     sacrificada); depois por forca desc; empate -> codigo antes de ciclo de
     vida, depois precedencia, depois nome.
@@ -242,7 +247,8 @@ def select_modules(index, tokens, norm_prompt):
         strength = sum(
             1 for kw in keywords if keyword_matches(kw, tokens, norm_prompt)
         )
-        if strength:
+        min_strength = 2 if meta.get("keywordsDerived") else 1
+        if strength >= min_strength:
             scored.append((name, meta, strength))
 
     def sort_key(item):

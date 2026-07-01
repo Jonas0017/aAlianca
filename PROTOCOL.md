@@ -217,7 +217,7 @@ O coração da v2. Em vez de um prompt gigante, a Aliança mantém **módulos de
     testing.md       # gatilho: "ao criar/alterar lógica testável"
     refactor.md      # gatilho: "ao detectar duplicação ou função > N linhas"
     code-quality.md  # gatilho: "antes de commit / em PR"
-    security.md      # gatilho: "ao tocar auth, dados pessoais ou pagamento"  (só se R≥40)
+    security.md      # gatilho: "ao tocar auth, dados pessoais ou pagamento"  (sempre que o gatilho ocorrer; profundidade ∝ risco R)
     interface.md     # gatilho: "ao criar/alterar superfície humana (tela, layout, CLI, erro de UI)"
     persona-p0.md    # gatilho: "usuário classificado como leigo"
     deep-questions.md# gatilho: "triagem indicou eixo ≥ 2"
@@ -407,7 +407,7 @@ Ideias que não estavam no escopo original mas que, na minha avaliação, são o
 
 - **A1. Versionamento + migração da Aliança.** ✅ *Implementado:* `alianca-version` no `router.md` + procedimento de migração de versão na instrução `migration` (aditivo, arquiva o obsoleto, valida com `health-check`). Projetos antigos migram sem quebrar.
 - **A2. health-check (autovalidação).** Um check que o agente roda periodicamente: o `router.md` aponta para módulos que existem? Há memória duplicada ou inchada? Algum doc passou do tamanho saudável? Testes estão verdes? O nível declarado bate com os eixos reais? Retorna um relatório de saúde acionável.
-- **A3. Precedência entre módulos.** ✅ *Implementado* no `router.md`: ordem declarada `security > bug-prevention > testing > architecture > refactor > code-quality`; os módulos de ciclo de vida ficam fora dela. (Estilo/formatação não é módulo — é o piso do `code-quality`.)
+- **A3. Precedência entre módulos.** ✅ *Implementado* no `router.md`: ordem declarada `security > bug-prevention > testing > architecture > refactor > interface > code-quality`; os módulos de ciclo de vida ficam fora dela. (Estilo/formatação não é módulo — é o piso do `code-quality`.)
 - **A4. Recuperação de desastre.** ✅ *Implementado* no `snapshot` (seção "Recuperação de desastre"): reconstruir o estado a partir do último snapshot + `memory/decisions/` + código/histórico, validar com `health-check`. Snapshot não serve de nada se ninguém sabe restaurar a partir dele.
 
 ### B. Concretude (tirar do abstrato)

@@ -1,5 +1,6 @@
 ---
 trigger: criar uma tarefa nova, ou mover uma tarefa entre estados (sobretudo ao declarar algo "pronto")
+keywords: tarefa, tarefas, task, backlog, kanban, quadro de tarefas, marcar como pronto, mover tarefa
 load-when: execução
 applies-to: todos os níveis (a estrutura escala; o fluxo dos 4 estados não)
 priority: fora da ordem de precedência — módulo de ciclo de vida (coordena o trabalho, não compete com os módulos de código)

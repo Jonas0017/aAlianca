@@ -34,15 +34,17 @@ A Aliança é a pasta [`alianca/`](alianca/). **Um comando basta** — "baixa e 
 4. Em um **projeto que já existe**, o LLM roda a `adopt`: **lê o código e os docs**, infere o nível, **acolhe a memória antiga numa fonte única** e integra o harness — sem recomeçar e sem mexer no comportamento (é integração, não substituição).
 5. Em um **projeto Aliança em andamento**, o LLM lê o snapshot mais recente e retoma de onde parou.
 
-> **Sempre ligado:** no bootstrap, o LLM instala um *forcing function* (em Claude Code: kernel no `CLAUDE.md` + hook `UserPromptSubmit`). É o que faz **todo prompt** passar pelo harness automaticamente — você não precisa lembrar o LLM de usá-lo a cada vez.
+> **Sempre ligado:** no bootstrap, o LLM instala um *forcing function* — o mecanismo que faz **todo prompt** passar pelo harness automaticamente, sem você precisar lembrar o LLM de usá-lo a cada vez.
+
+**Onde cada coisa funciona (honestidade sobre o alcance):** a estrutura `.md` é model-agnostic — qualquer LLM que lê arquivos consegue seguir o `START-HERE.md` → `router.md`, e isso foi **validado na prática** em modelos diferentes (ver [`VALIDATION.md`](VALIDATION.md)). Já o **forcing function determinístico** — o microkernel de hooks em [`alianca/kernel/`](alianca/kernel/) (roteamento por prompt + portões de segurança e verificação) — hoje existe **apenas para Claude Code**. Nas demais ferramentas o harness opera em **modo advisory**: prosa (regra "always apply" / preâmbulo) mandando seguir o router — funciona, mas é mais fraco, porque depende do modelo honrar o texto. Adapters determinísticos para outras ferramentas são roadmap.
 
 **Mapeamento por ferramenta:**
 
 | Ferramenta | Como a Aliança se encaixa |
 |---|---|
-| **Claude Code** | cada instrução vira uma *skill* (o `trigger` é a linha TRIGGER); memória e subagents nativos |
-| **Cursor / outros** | `router.md` no system prompt; instruções lidas sob demanda |
-| **Qualquer LLM** | basta ler arquivos: siga o `START-HERE.md` → `router.md` |
+| **Claude Code** | **suporte completo:** kernel de hooks determinístico (route/gate/verify) + `CLAUDE.md`; memória e subagents nativos |
+| **Cursor / outros** | **modo advisory:** `router.md` via regra "always apply"/system prompt; instruções lidas sob demanda |
+| **Qualquer LLM** | **modo advisory:** basta ler arquivos — siga o `START-HERE.md` → `router.md` |
 
 ---
 
@@ -56,7 +58,7 @@ A Aliança é a pasta [`alianca/`](alianca/). **Um comando basta** — "baixa e 
 
 ---
 
-## As 17 instruções
+## As 18 instruções
 
 Carregadas **uma por vez, por gatilho** (índice completo em [`alianca/router.md`](alianca/router.md)):
 
@@ -78,6 +80,7 @@ Carregadas **uma por vez, por gatilho** (índice completo em [`alianca/router.md
 | [`snapshot`](alianca/instructions/snapshot.md) | antes de tarefa grande ou ao concluir um marco |
 | [`migration`](alianca/instructions/migration.md) | o projeto cresceu/encolheu e o nível precisa mudar |
 | [`health-check`](alianca/instructions/health-check.md) | revisar a saúde do harness (periódico) |
+| [`x9`](alianca/instructions/x9.md) | auditar pontas soltas do projeto — coisas criadas/prometidas pela metade |
 | [`agents`](alianca/instructions/agents.md) | decidir dividir trabalho entre vários agentes |
 
 ---
@@ -86,15 +89,18 @@ Carregadas **uma por vez, por gatilho** (índice completo em [`alianca/router.md
 
 ```
 .
-├─ README.md          ← você está aqui
-├─ PROTOCOL.md        ← a teoria/spec completa (16 seções)
-├─ HANDOFF.md         ← estado e decisões do desenvolvimento da Aliança
-└─ alianca/           ← a implementação de referência (é isto que você copia)
-   ├─ START-HERE.md   ← ponto de entrada de qualquer LLM
-   ├─ router.md       ← índice das instruções + gatilhos + precedência
-   ├─ instructions/   ← as 17 instruções carregadas por gatilho
-   ├─ memory/         ← memória do projeto (contexto, stack, decisões, arquivo)
-   └─ snapshots/      ← pontos de retomada
+├─ README.md            ← você está aqui
+├─ PROTOCOL.md          ← a teoria/spec completa (17 seções, §0–§16)
+├─ HANDOFF.md           ← estado e decisões do desenvolvimento da Aliança
+├─ VALIDATION.md        ← validação prática (testes A/B com e sem harness)
+└─ alianca/             ← a implementação de referência (é isto que você copia)
+   ├─ START-HERE.md     ← ponto de entrada de qualquer LLM
+   ├─ router.md         ← índice das instruções + gatilhos + precedência
+   ├─ router.index.json ← índice compilado (gerado por kernel/compile.py)
+   ├─ instructions/     ← as 18 instruções carregadas por gatilho
+   ├─ kernel/           ← microkernel (Claude Code): hooks route/gate/verify + log
+   ├─ memory/           ← memória do projeto (contexto, stack, decisões, arquivo)
+   └─ snapshots/        ← pontos de retomada
 ```
 
 > A **stack não tem pasta**: a LLM decide as ferramentas no `setup` (do próprio conhecimento) e registra os comandos concretos em `memory/stack.md`, sob medida para cada projeto.
@@ -122,7 +128,9 @@ Um projeto **sobe de edição** conforme a persona e o nível evoluem — sem re
 
 ## Status
 
-Versão **2.2** (rascunho, em evolução). As 17 instruções estão prontas e a Aliança está conceitualmente fechada; o calibre fino da rubrica continua se ajustando no uso real, pelo próprio loop adaptativo (estimativa → observa → reajusta). A **2.2** trouxe o módulo `interface` (design/ergonomia/acessibilidade), o caminho `adopt` (integrar a projetos que já existem, com memória de fonte única) e o **forcing function "sempre ligado"** (todo prompt passa pelo harness, sem depender do modelo lembrar). **Validada na prática** com um teste A/B em duas LLMs (Claude e Copilot) — ver [`VALIDATION.md`](VALIDATION.md). Idioma de trabalho: **PT-BR** (artefatos gerados seguem o idioma do usuário).
+Versão **2.2** (rascunho, em evolução). As 18 instruções estão prontas e a Aliança está conceitualmente fechada; o calibre fino da rubrica continua se ajustando no uso real, pelo próprio loop adaptativo (estimativa → observa → reajusta). A **2.2** trouxe o módulo `interface` (design/ergonomia/acessibilidade), o caminho `adopt` (integrar a projetos que já existem, com memória de fonte única), o **forcing function "sempre ligado"** (todo prompt passa pelo harness, sem depender do modelo lembrar) e o módulo `x9` (auditoria de pontas soltas). **Validada na prática** em dois rounds — teste A/B em duas LLMs (Claude e Copilot) e teste controlado com kernel + LLM local — ver [`VALIDATION.md`](VALIDATION.md).
+
+**Alcance honesto:** a estrutura `.md` funciona em qualquer LLM leitor de arquivos (é isso que a validação mostra); o **enforcement determinístico** — o microkernel de hooks (`alianca/kernel/`) — hoje é **só Claude Code**. Nas demais ferramentas o harness roda em modo advisory (mais fraco). A ambição universal continua; adapters para outras ferramentas são o roadmap, não o presente. Idioma de trabalho: **PT-BR** (artefatos gerados seguem o idioma do usuário).
 
 ---
 

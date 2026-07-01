@@ -1,5 +1,6 @@
 ---
 trigger: chegar a um projeto que JÁ EXISTE e ainda não usa a Aliança — há código/docs, mas não existe a pasta `alianca/` (nem `memory/active-context.md`)
+keywords: adotar, adote, adota, adocao, brownfield, projeto existente, integrar a alianca, instalar a alianca, adotar a alianca
 load-when: bootstrap
 applies-to: todas as personas (na prática P1–P3; raro em P0)
 priority: bootstrap (roda antes de qualquer execução; fora da ordem de precedência de código)

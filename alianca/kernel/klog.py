@@ -104,7 +104,7 @@ def _summary(n=20):
         linhas = []
 
     # Log inexistente ou so linhas em branco -> sem registros.
-    if not any(l.strip() for l in linhas):
+    if not any(ln.strip() for ln in linhas):
         return ["sem registros ainda"]
 
     counts = {}          # EVENT -> total
@@ -154,10 +154,10 @@ def _summary(n=20):
     # Ultimas N decisoes via a funcao tail existente (contrato intacto).
     # Filtra linhas em branco SO na exibicao, para o rotulo bater com a
     # contagem por evento (que ja ignora vazios) — tail() segue intacto.
-    ult = [l for l in tail(n) if l.strip()]
+    ult = [ln for ln in tail(n) if ln.strip()]
     out.append("ultimas %d decisoes:" % len(ult))
-    for l in ult:
-        out.append("  " + l)
+    for ln in ult:
+        out.append("  " + ln)
 
     return out
 

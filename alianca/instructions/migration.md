@@ -1,5 +1,6 @@
 ---
 trigger: sinais de crescimento/encolhimento do projeto cruzam um gatilho de nível
+keywords: mudar de nivel, subir de nivel, rebaixar o nivel, promover o nivel, gatilho de nivel, nivel do harness, migrar de nivel
 load-when: evolução
 applies-to: todos os níveis
 priority: lifecycle (fora da ordem de precedência de código)
