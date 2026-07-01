@@ -1,0 +1,29 @@
+{
+  "//": "Forcing function do kernel da Alianca (NextGen). route.py roteia contexto em todo prompt; gate.py bloqueia segredo hardcoded em escritas. Fonte: alianca/kernel/. Para desligar, remova o bloco 'hooks' ou renomeie este arquivo.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PROJECT_DIR}\\alianca\\kernel\\route.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PROJECT_DIR}\\alianca\\kernel\\gate.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

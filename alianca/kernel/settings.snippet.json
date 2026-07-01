@@ -1,0 +1,29 @@
+{
+  "//": "SNIPPET REVIEWAVEL -- NAO E UM settings.json ATIVO. Copie os blocos de 'hooks' para o seu .claude/settings.json depois de revisar. Registra os DOIS portoes do kernel da Alianca: route.py (roteia contexto no prompt) e gate.py (bloqueia segredo hardcoded em escritas).",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PROJECT_DIR}\\alianca\\kernel\\route.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PROJECT_DIR}\\alianca\\kernel\\gate.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

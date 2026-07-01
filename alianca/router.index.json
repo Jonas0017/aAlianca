@@ -1,0 +1,329 @@
+{
+  "generatedFrom": "alianca/instructions/*.md",
+  "modules": {
+    "adopt": {
+      "file": "instructions/adopt.md",
+      "keywords": [
+        "active",
+        "ainda",
+        "alianca",
+        "chegar",
+        "codigo",
+        "context",
+        "docs",
+        "existe",
+        "mas",
+        "memory",
+        "nem",
+        "pasta",
+        "usa"
+      ],
+      "loadWhen": "bootstrap",
+      "priority": null,
+      "trigger": "chegar a um projeto que JÁ EXISTE e ainda não usa a Aliança — há código/docs, mas não existe a pasta `alianca/` (nem `memory/active-context.md`)"
+    },
+    "agents": {
+      "file": "instructions/agents.md",
+      "keywords": [
+        "agentes",
+        "decidir",
+        "dividir",
+        "entre",
+        "especialistas",
+        "frentes",
+        "grande",
+        "independente",
+        "independentes",
+        "nivel",
+        "paralelas",
+        "revisao",
+        "tarefa",
+        "trabalho",
+        "varios"
+      ],
+      "loadWhen": "execução",
+      "priority": null,
+      "trigger": "decidir dividir trabalho entre vários agentes/especialistas (nível ≥ 3, tarefa grande com frentes paralelas independentes, ou revisão independente)"
+    },
+    "architecture": {
+      "file": "instructions/architecture.md",
+      "keywords": [
+        "camada",
+        "decisao",
+        "dependencia",
+        "estrutura",
+        "fronteira",
+        "modulo",
+        "nova",
+        "novo"
+      ],
+      "loadWhen": "execução",
+      "priority": 3,
+      "trigger": "criar ou alterar a estrutura do projeto — novo módulo, nova camada, fronteira, ou decisão de dependência"
+    },
+    "bug-prevention": {
+      "file": "instructions/bug-prevention.md",
+      "keywords": [
+        "codigo",
+        "concorrencia",
+        "entrada",
+        "erro",
+        "escrever",
+        "estado",
+        "externa",
+        "integracao",
+        "mutavel",
+        "risco"
+      ],
+      "loadWhen": "execução",
+      "priority": 1,
+      "trigger": "escrever código com risco de erro — entrada externa, estado mutável, concorrência, integração"
+    },
+    "code-quality": {
+      "file": "instructions/code-quality.md",
+      "keywords": [
+        "abrir",
+        "antes",
+        "bloco",
+        "codigo",
+        "commit",
+        "finalizar"
+      ],
+      "loadWhen": "review",
+      "priority": 6,
+      "trigger": "antes de commit, ao abrir PR, ou ao finalizar um bloco de código"
+    },
+    "deep-questions": {
+      "file": "instructions/deep-questions.md",
+      "keywords": [
+        "algum",
+        "banda",
+        "eixo",
+        "indicou",
+        "score",
+        "setup",
+        "triagem"
+      ],
+      "loadWhen": "bootstrap",
+      "priority": null,
+      "trigger": "a triagem do setup indicou algum eixo ≥ banda 2 (score ≥ 41)"
+    },
+    "health-check": {
+      "file": "instructions/health-check.md",
+      "keywords": [
+        "demanda",
+        "harness",
+        "periodico",
+        "retomar",
+        "revisar",
+        "saude",
+        "sob"
+      ],
+      "loadWhen": "review",
+      "priority": null,
+      "trigger": "revisar a saúde do harness (periódico, ao retomar, ou sob demanda)"
+    },
+    "interface": {
+      "file": "instructions/interface.md",
+      "keywords": [
+        "cli",
+        "componente",
+        "erro",
+        "fluxo",
+        "formulario",
+        "humano",
+        "interface",
+        "layout",
+        "mensagem",
+        "pagina",
+        "qualquer",
+        "superficie",
+        "tela",
+        "texto",
+        "tui",
+        "usa"
+      ],
+      "loadWhen": "execução",
+      "priority": 5,
+      "trigger": "criar ou alterar qualquer superfície que um humano vê ou usa — tela, página, layout, componente, formulário, fluxo, CLI/TUI, texto de interface ou mensagem de erro"
+    },
+    "migration": {
+      "file": "instructions/migration.md",
+      "keywords": [
+        "crescimento",
+        "cruzam",
+        "encolhimento",
+        "gatilho",
+        "nivel",
+        "sinais"
+      ],
+      "loadWhen": "evolução",
+      "priority": null,
+      "trigger": "sinais de crescimento/encolhimento do projeto cruzam um gatilho de nível"
+    },
+    "persona-p0": {
+      "file": "instructions/persona-p0.md",
+      "keywords": [
+        "classificado",
+        "descreve",
+        "leigo",
+        "tecnologia",
+        "usuario"
+      ],
+      "loadWhen": "bootstrap + execução",
+      "priority": null,
+      "trigger": "usuário classificado como leigo (P0) — descreve produto/problema, não tecnologia"
+    },
+    "questions": {
+      "file": "instructions/questions.md",
+      "keywords": [
+        "aberto",
+        "adiou",
+        "depois",
+        "pergunta",
+        "perguntar",
+        "responde",
+        "respondida",
+        "resposta",
+        "usuario"
+      ],
+      "loadWhen": "execução",
+      "priority": null,
+      "trigger": "você vai perguntar algo sobre o projeto ao usuário, OU o usuário adiou uma resposta (\"responde depois\"), OU uma pergunta em aberto foi respondida"
+    },
+    "refactor": {
+      "file": "instructions/refactor.md",
+      "keywords": [
+        "demais",
+        "detectar",
+        "duplicacao",
+        "funcao",
+        "longa",
+        "misturadas",
+        "modulo",
+        "responsabilidades"
+      ],
+      "loadWhen": "execução",
+      "priority": 4,
+      "trigger": "detectar duplicação (3x), função longa demais, ou módulo com responsabilidades misturadas"
+    },
+    "security": {
+      "file": "instructions/security.md",
+      "keywords": [
+        "autenticacao",
+        "auth",
+        "autorizacao",
+        "cartao",
+        "cobranca",
+        "cookie",
+        "credenciais",
+        "credencial",
+        "criptografia",
+        "dados",
+        "gdpr",
+        "hash",
+        "jwt",
+        "lgpd",
+        "login",
+        "oauth",
+        "pagamento",
+        "pagamentos",
+        "permissao",
+        "pessoais",
+        "pix",
+        "segredo",
+        "segredos",
+        "senha",
+        "sessao",
+        "token"
+      ],
+      "loadWhen": "execução",
+      "priority": 0,
+      "trigger": "tocar em autenticação, dados pessoais, pagamentos, ou segredos/credenciais"
+    },
+    "setup": {
+      "file": "instructions/setup.md",
+      "keywords": [
+        "active",
+        "context",
+        "existe",
+        "iniciar",
+        "memory",
+        "novo"
+      ],
+      "loadWhen": "bootstrap",
+      "priority": null,
+      "trigger": "iniciar um projeto novo (não existe memory/active-context.md)"
+    },
+    "snapshot": {
+      "file": "instructions/snapshot.md",
+      "keywords": [
+        "antes",
+        "concluir",
+        "etapa",
+        "fica",
+        "grande",
+        "longa",
+        "marco",
+        "multi",
+        "sessao",
+        "tarefa"
+      ],
+      "loadWhen": "execução",
+      "priority": null,
+      "trigger": "antes de uma tarefa grande/multi-etapa, ao concluir um marco, ou quando a sessão fica longa"
+    },
+    "tasks": {
+      "file": "instructions/tasks.md",
+      "keywords": [
+        "declarar",
+        "entre",
+        "estados",
+        "mover",
+        "nova",
+        "pronto",
+        "sobretudo",
+        "tarefa"
+      ],
+      "loadWhen": "execução",
+      "priority": null,
+      "trigger": "criar uma tarefa nova, ou mover uma tarefa entre estados (sobretudo ao declarar algo \"pronto\")"
+    },
+    "testing": {
+      "file": "instructions/testing.md",
+      "keywords": [
+        "assert",
+        "cobertura",
+        "componente",
+        "endpoint",
+        "integracao",
+        "jest",
+        "mock",
+        "pytest",
+        "regressao",
+        "spec",
+        "tdd",
+        "testar",
+        "testavel",
+        "teste",
+        "testes",
+        "unitario",
+        "unittest",
+        "vitest"
+      ],
+      "loadWhen": "execução",
+      "priority": 2,
+      "trigger": "criar ou alterar lógica testável (função, regra de negócio, endpoint, componente)"
+    }
+  },
+  "precedence": [
+    "security",
+    "bug-prevention",
+    "testing",
+    "architecture",
+    "refactor",
+    "interface",
+    "code-quality"
+  ],
+  "version": "3.0"
+}

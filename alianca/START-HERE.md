@@ -68,6 +68,7 @@ Um **harness adaptativo**: estrutura + instruções que se moldam ao **projeto**
 - **Definition of Done:** uma tarefa só fecha com **testes passando, lint limpo e docs/memória atualizados**.
 - **Anti-alucinação:** nunca declare algo pronto sem rodar/observar; **cite `arquivo:linha`** ao afirmar fatos sobre o código.
 - **Estado vive em disco:** o que importa fica em `memory/` e `snapshots/`, nunca só na janela de contexto. Não tente administrar % de contexto — garanta recuperabilidade.
+- **Coordenador por padrão:** a sessão principal **coordena**; execução pesada e autocontida (implementação inteira, mudança multi-arquivo, varredura, pesquisa, verificação que roda coisas) vai para um **subagente** e volta como **resumo** — isso descarrega a janela *de trabalho*, complementando o "estado vive em disco" (que descarrega a janela *persistente*). Ajuste trivial e decisões ficam inline. O hook `kernel/route.py` injeta esse lembrete nos turnos de execução; você não precisa pedir.
 - **Segredos:** nunca commitar credencial; `.gitignore` + `.env.example` a partir do Nível 1 (quando há repositório).
 - **Persona P0 (leigo):** linguagem humana, zero jargão. Entregue a ele "o que foi feito / o que falta / o que preciso de você".
 - **O harness aprende:** erro que se repete neste projeto vira regra em `memory/feedback.md` — não erre a mesma coisa duas vezes.

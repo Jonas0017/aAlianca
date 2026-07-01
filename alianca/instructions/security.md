@@ -1,5 +1,6 @@
 ---
 trigger: tocar em autenticação, dados pessoais, pagamentos, ou segredos/credenciais
+keywords: auth, autenticacao, login, senha, credencial, credenciais, segredo, segredos, token, jwt, oauth, sessao, cookie, permissao, autorizacao, pagamento, pagamentos, cartao, pix, cobranca, dados, pessoais, lgpd, gdpr, criptografia, hash
 load-when: execução
 applies-to: obrigatória se R ≥ 40; recomendada sempre que o gatilho ocorrer
 priority: security (MÁXIMA — nunca sacrificada por estilo ou velocidade)

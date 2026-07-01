@@ -1,5 +1,6 @@
 ---
 trigger: criar ou alterar lógica testável (função, regra de negócio, endpoint, componente)
+keywords: teste, testes, testar, testavel, tdd, cobertura, spec, unitario, integracao, regressao, mock, assert, pytest, jest, vitest, unittest, endpoint, componente
 load-when: execução
 applies-to: todos os níveis (profundidade escala com o nível)
 priority: testing — 3ª na ordem do router (abaixo de bug-prevention, acima de architecture)
