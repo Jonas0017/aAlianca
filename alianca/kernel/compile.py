@@ -214,13 +214,22 @@ def main():
 
         load_when = fm.get("load-when", "").strip()
 
-        modules[name] = {
+        # Grafo operacional (opcional, adaptativo): 'pulls' = arestas de
+        # contexto necessario nao-dito (ex.: security pulls testing). Modulo
+        # sem 'pulls' nao entra no grafo. Nomes de modulo preservados (com
+        # hifen), na ordem declarada.
+        pulls = [p.strip() for p in re.split(r"[,;]", fm.get("pulls", "")) if p.strip()]
+
+        entry = {
             "file": f"instructions/{name}.md",
             "trigger": trigger,
             "keywords": keywords,
             "loadWhen": load_when,
             "priority": compute_priority(name),
         }
+        if pulls:
+            entry["pulls"] = pulls
+        modules[name] = entry
 
     index = {
         "version": VERSION,

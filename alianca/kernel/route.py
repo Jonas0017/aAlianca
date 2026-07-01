@@ -267,14 +267,17 @@ def is_execution_intent(tokens, matched):
       (a) um verbo-radical de execucao (implementar, refatorar, migrar...), OU
       (b) 2+ modulos de CODIGO casaram (priority != null) — varias frentes
           tecnicas ao mesmo tempo sugere trabalho substancial.
+
+    Le o meta em item[1]: funciona tanto com 2-tuplas (name, meta) quanto com
+    3-tuplas (name, meta, pulled_by) — a saida de expand_pulls.
     """
     for tok in tokens:
         for stem in EXECUTION_STEMS:
             if tok.startswith(stem):
                 return True
     code_hits = sum(
-        1 for _name, meta in matched
-        if isinstance(meta.get("priority"), int)
+        1 for item in matched
+        if isinstance(item[1].get("priority"), int)
     )
     return code_hits >= 2
 
@@ -295,20 +298,101 @@ def cap_modules(scored, limit=3):
     return [(name, meta) for (name, meta, _strength) in scored[:limit]]
 
 
-def build_block(matched):
-    """Monta o bloco compacto de roteamento."""
-    if not matched:
+def expand_pulls(selected, index, ceiling=5):
+    """
+    TRAVERSAL DE GRAFO (1 salto, adaptativo, limitado).
+
+    'selected' = saida de cap_modules = [(name, meta)] (os diretos, por keyword).
+    Retorna [(name, meta, pulled_by)]: pulled_by=None para diretos; pulled_by=
+    <nome do puxador> para os trazidos pelo grafo via meta["pulls"].
+
+    Regras:
+      - 1 SALTO SO: expande apenas os pulls dos diretos, nunca pulls-de-pulls
+        (seguranca a ciclo por construcao).
+      - Dedup: pula alvo ja presente (direto ou ja puxado por outro).
+      - Aresta quebrada: alvo ausente de index["modules"] e ignorado em silencio
+        (quem reporta e o health-check/x9).
+      - Ordem: todos os diretos primeiro (na ordem de relevancia recebida);
+        depois os puxados por precedencia (codigo/priority asc; ciclo de vida
+        por ultimo; empate por nome). Corta o excedente para len <= ceiling
+        (os diretos, no maximo 3, sempre cabem).
+      - ADAPTATIVO: se nenhum direto tem 'pulls', devolve exatamente os diretos
+        convertidos p/ 3-tupla (pulled_by=None) — zero inflacao do caso simples.
+
+    Blindagem: qualquer erro cai para os diretos sem pulls.
+    """
+    directs = [(name, meta, None) for (name, meta) in selected]
+    try:
+        modules = index.get("modules", {}) if isinstance(index, dict) else {}
+        if not isinstance(modules, dict):
+            return directs
+
+        seen = set(name for (name, _meta) in selected)
+        pulled = []  # (name, meta, pulled_by)
+        for name, meta in selected:
+            if not isinstance(meta, dict):
+                continue
+            targets = meta.get("pulls")
+            if not isinstance(targets, (list, tuple)):
+                continue
+            for tgt in targets:
+                if not isinstance(tgt, str) or tgt in seen:
+                    continue
+                tmeta = modules.get(tgt)
+                if not isinstance(tmeta, dict):
+                    # aresta quebrada -> ignora em silencio
+                    continue
+                seen.add(tgt)
+                pulled.append((tgt, tmeta, name))
+
+        if not pulled:
+            return directs
+
+        def pull_key(item):
+            name, meta, _by = item
+            pr = meta.get("priority")
+            is_code = isinstance(pr, int)
+            return (
+                0 if is_code else 1,       # codigo antes de ciclo de vida
+                pr if is_code else 999,    # priority asc entre os de codigo
+                name,
+            )
+
+        pulled.sort(key=pull_key)
+        expanded = directs + pulled
+        if len(expanded) > ceiling:
+            expanded = expanded[:ceiling]
+        return expanded
+    except Exception:
+        # blindagem: em duvida, diretos sem pulls (nunca quebra o turno)
+        return directs
+
+
+def build_block(expanded):
+    """
+    Monta o bloco compacto de roteamento.
+
+    Aceita itens (name, meta, pulled_by) de expand_pulls (ou 2-tuplas legadas).
+    Quando pulled_by, anexa a dica "(puxado por <pulled_by>)" na linha.
+    """
+    if not expanded:
         return base_reminder()
 
     lines = [HEADER, "Carregue ANTES de agir (ordem de precedencia):"]
-    for name, meta in matched:
+    for item in expanded:
+        name = item[0]
+        meta = item[1]
+        pulled_by = item[2] if len(item) > 2 else None
         rel = meta.get("file") or ("instructions/" + name + ".md")
         path = "alianca/" + str(rel).lstrip("/")
         hint = short_hint(meta.get("trigger"))
+        prov = "  (puxado por {0})".format(pulled_by) if pulled_by else ""
         if hint:
-            lines.append("  * {0} -> {1}  ({2})".format(name, path, hint))
+            lines.append(
+                "  * {0} -> {1}  ({2}){3}".format(name, path, hint, prov)
+            )
         else:
-            lines.append("  * {0} -> {1}".format(name, path))
+            lines.append("  * {0} -> {1}{2}".format(name, path, prov))
     lines.append(LOOP)
     return "\n".join(lines)
 
@@ -331,8 +415,19 @@ def main():
         emit(with_coordinator(base_reminder(), tokens, []))
 
     matched = cap_modules(select_modules(index, tokens, norm_prompt))
-    klog("ROUTE", "mods=[{}]".format(", ".join(n for n, _ in matched)))
-    emit(with_coordinator(build_block(matched), tokens, matched))
+    expanded = expand_pulls(matched, index)
+    directs = [n for (n, _m, by) in expanded if by is None]
+    pulls = [n for (n, _m, by) in expanded if by is not None]
+    klog(
+        "ROUTE",
+        "mods=[{}] pulls=[{}]".format(", ".join(directs), ", ".join(pulls)),
+    )
+    # O gate do coordenador avalia a intencao sobre os modulos DIRETOS
+    # (matched), nao sobre os puxados pelo grafo: pulls de codigo (ex.:
+    # security -> testing, bug-prevention) nao devem inflar o heuristico
+    # "2+ modulos de codigo" e disparar o coordenador espuriamente. O grafo
+    # (expanded) segue intacto no build_block.
+    emit(with_coordinator(build_block(expanded), tokens, matched))
 
 
 if __name__ == "__main__":

@@ -16,6 +16,11 @@ Verifica se o harness está íntegro e coerente com o projeto real. Rode periodi
 - [ ] Toda instrução em `instructions/` está registrada no `router.md`?
 - [ ] Existe `START-HERE.md`, `router.md` e `memory/active-context.md`?
 
+**Grafo operacional (arestas `pulls`)**
+- [ ] Todo alvo de `pulls` (no `router.index.json`) existe como módulo? → aresta apontando pra módulo inexistente é ponta solta; o router a ignora em silêncio, mas o grafo mentiu. Corrija a aresta ou o nome.
+- [ ] O índice está recompilado após mexer em `pulls`? (`python alianca/kernel/compile.py` — idempotente)
+- [ ] Alguma aresta virou ruído? Um `pulls` que nunca traz contexto útil é dívida — pode matar (ver `x9`, "capacidade não usada é dívida").
+
 **Memória**
 - [ ] Algum arquivo de `memory/` está grande/duplicado demais? → consolidar/dividir.
 - [ ] `active-context.md` reflete o estado real (não está defasado)?

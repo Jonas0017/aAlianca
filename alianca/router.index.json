@@ -231,6 +231,9 @@
       ],
       "loadWhen": "execução",
       "priority": 4,
+      "pulls": [
+        "testing"
+      ],
       "trigger": "detectar duplicação (3x), função longa demais, ou módulo com responsabilidades misturadas"
     },
     "security": {
@@ -265,6 +268,10 @@
       ],
       "loadWhen": "execução",
       "priority": 0,
+      "pulls": [
+        "testing",
+        "bug-prevention"
+      ],
       "trigger": "tocar em autenticação, dados pessoais, pagamentos, ou segredos/credenciais"
     },
     "setup": {
