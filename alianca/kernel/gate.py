@@ -23,7 +23,16 @@ Principios:
 
 import sys
 import io
+import os
 import re
+
+# klog: log do kernel (dmesg). Best-effort; se faltar, no-op (nunca quebra o hook).
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from klog import klog
+except Exception:
+    def klog(event, detail):
+        pass
 
 ALLOWED_TOOLS = ("Write", "Edit", "MultiEdit")
 
@@ -286,6 +295,7 @@ def main():
 
     if finding:
         where = file_path or "(arquivo sem caminho)"
+        klog("GATE", "BLOCK {} :: {}".format(where, finding))
         msg = (
             "[Alianca/portao] BLOQUEADO: possivel segredo hardcoded em '{}': {}.\n"
             "START-HERE §5: nunca commitar credencial -- use variavel de ambiente / "

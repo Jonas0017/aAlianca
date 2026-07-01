@@ -4,20 +4,14 @@
 compile.py — o "compilador" da Aliança.
 
 Lê todos os módulos em alianca/instructions/*.md, parseia o frontmatter (à mão,
-sem PyYAML) e produz dois artefatos DETERMINÍSTICOS e IDEMPOTENTES:
+sem PyYAML) e produz o índice compilado alianca/router.index.json (schema fixo,
+sort_keys, ensure_ascii=False) que o route.py consome.
 
-  1) alianca/router.index.json  — o índice compilado (schema fixo, sort_keys).
-  2) alianca/generated/skills/alianca-<nome>/SKILL.md — ponteiros de skill
-     nativos do Claude Code (provisionamento — automatiza o que hoje o usuário
-     cria no braço). Gerados em alianca/generated/ (pasta revisável); NÃO ativa
-     nada e NÃO escreve em .claude/skills/.
-
-Rodar duas vezes produz exatamente o mesmo resultado.
+Rodar duas vezes produz exatamente o mesmo resultado (idempotente).
 """
 
 import json
 import re
-import shutil
 import sys
 import unicodedata
 from pathlib import Path
@@ -70,7 +64,6 @@ STOPWORDS = {
 ALIANCA_DIR = Path(__file__).resolve().parent.parent
 INSTRUCTIONS_DIR = ALIANCA_DIR / "instructions"
 INDEX_PATH = ALIANCA_DIR / "router.index.json"
-SKILLS_DIR = ALIANCA_DIR / "generated" / "skills"
 
 
 # ---------------------------------------------------------------------------
@@ -177,42 +170,6 @@ def compute_priority(name):
 
 
 # ---------------------------------------------------------------------------
-# Geração de SKILL.md (ponteiros)
-# ---------------------------------------------------------------------------
-
-def yaml_double_quote(s):
-    """
-    Serializa uma string como escalar YAML entre aspas duplas, válido mesmo
-    quando o valor contém ':' , '"' ou '\\'. Sem isso, um trigger como
-    'Carregue quando: X' quebra o frontmatter (YAML não permite ': ' em
-    escalar plano) e a skill inteira deixa de carregar.
-    """
-    escaped = s.replace("\\", "\\\\").replace('"', '\\"')
-    return f'"{escaped}"'
-
-
-def write_skill(name, trigger):
-    """Escreve alianca/generated/skills/alianca-<nome>/SKILL.md."""
-    skill_dir = SKILLS_DIR / f"alianca-{name}"
-    skill_dir.mkdir(parents=True, exist_ok=True)
-    description = yaml_double_quote(f"Carregue quando: {trigger}")
-    content = (
-        "---\n"
-        f"name: alianca-{name}\n"
-        f"description: {description}\n"
-        "---\n"
-        "Este e um ponteiro gerado pela Alianca. Ao ativar, LEIA "
-        f"alianca/instructions/{name}.md e siga-o antes de agir. "
-        "Precedencia e invariantes: alianca/router.md e alianca/START-HERE.md.\n"
-    )
-    path = skill_dir / "SKILL.md"
-    # Escrita determinística: só reescreve se o conteúdo mudar (idempotente,
-    # mas escrever sempre também seria idempotente — comparamos para evitar
-    # tocar mtime sem necessidade).
-    write_text(path, content)
-
-
-# ---------------------------------------------------------------------------
 # I/O determinístico (LF, utf-8, sem reescrever se idêntico)
 # ---------------------------------------------------------------------------
 
@@ -277,32 +234,11 @@ def main():
     ) + "\n"
     write_text(INDEX_PATH, index_text)
 
-    # Provisionar skills (uma por módulo indexado).
-    for name, mod in modules.items():
-        write_skill(name, mod["trigger"])
-
-    # Podar skills órfãs: diretórios alianca-<nome> cujo módulo-fonte não
-    # existe mais (renomeado/removido). Sem isso a pasta apodrece e passa a
-    # apontar para instructions/<nome>.md inexistente.
-    pruned = []
-    if SKILLS_DIR.is_dir():
-        for skill_dir in sorted(SKILLS_DIR.glob("alianca-*")):
-            if not skill_dir.is_dir():
-                continue
-            source_name = skill_dir.name[len("alianca-"):]
-            if source_name not in modules:
-                shutil.rmtree(skill_dir)
-                pruned.append(source_name)
-
     # ------------------------------------------------------------------
     # Resumo
     # ------------------------------------------------------------------
     print(f"Alianca compile — {INDEX_PATH.name} gerado.")
     print(f"  Modulos indexados: {len(modules)}")
-    print(f"  Skills geradas:    {len(modules)} em {SKILLS_DIR}")
-    if pruned:
-        print(f"  Skills orfas removidas: {len(pruned)} "
-              f"({', '.join(sorted(pruned))})")
     if skipped:
         print(f"  AVISO: {len(skipped)} arquivo(s) sem frontmatter valido "
               f"(pulados): {', '.join(skipped)}")

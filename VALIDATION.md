@@ -50,6 +50,29 @@ O harness levanta o piso de **qualquer** modelo, mas um modelo mais forte preenc
 
 A Aliança **funciona e é model-agnostic.** Não promete código perfeito nem salva de tudo — promete (e entrega) **processo**: testes, memória, estrutura e segurança registrada, **proporcionais ao projeto**, em qualquer LLM. Para algo feito "pra durar e melhorar", essa é a diferença entre um protótipo e um projeto sustentável.
 
+## Segundo round — kernel NextGen + Ollama local (2026-07-01)
+
+Depois de a Aliança ganhar o **microkernel de hooks** (roteamento + portões determinísticos), um teste mais controlado, com LLM **local**.
+
+- **Setup justo:** mesmo modelo (`qwen2.5-coder:7b`), mesmo prompt, mesma amostragem (`temperature=0.2`, `seed=42`). Única variável: o contexto que o kernel injetaria (±Aliança).
+- **Prompt escolhido pra discriminar:** função Python de cadastro que recebe e-mail + senha e salva no PostgreSQL.
+- **Três braços:**
+
+| Braço | Resultado |
+|---|---|
+| `sem-alianca` | código funcional, mas **senha em texto puro** + credencial no código; "use bcrypt" só como nota não implementada |
+| `com-alianca` (preâmbulo restritivo *"não escreva antes de obedecer"*) | **recusou** entregar código — supercorrigiu |
+| `com-alianca-neutro` (preâmbulo neutro, fiel ao que o kernel injeta) | entregou **código seguro**: bcrypt, query parametrizada, transação com rollback |
+
+**Conclusões honestas:**
+1. O harness **virou a chave do defeito nº1** (senha em texto puro → bcrypt) mesmo num modelo 7B.
+2. A recusa do braço restritivo era o **enquadramento da injeção**, não o `security.md`. O kernel real (`route.py`) injeta de forma **neutra**, então se comporta como o braço neutro — o `security.md` **não precisou de ajuste**. (O teste que faríamos pra "consertar" provou que não havia o que consertar.)
+3. Limite honesto: mesmo com Aliança, o 7B ainda **hardcodou a credencial do banco** e **pulou testes** — limite do **modelo pequeno**, não do harness. Um modelo maior fecha esses também.
+
+**Aprendizado que virou arquitetura:** o que é crítico deve migrar do **texto-injetado (advisory)** para os **portões determinísticos (enforcement)** — é a origem do 3º portão (`Verification`) e do papel do `X9` como mecanismo de integridade.
+
+> Teste realizado em 2026-07-01 · LLM: `qwen2.5-coder:7b` via Ollama local · 3 braços · tarefa: função de cadastro em Python/PostgreSQL.
+
 ## Reproduza você mesmo
 
 1. Crie duas pastas separadas e vazias, **fora deste repositório**: `sem-harness/` e `com-harness/`.

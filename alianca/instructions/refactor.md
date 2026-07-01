@@ -1,5 +1,6 @@
 ---
 trigger: detectar duplicação (3x), função longa demais, ou módulo com responsabilidades misturadas
+keywords: refatorar, refatoracao, duplicacao, duplicado, duplicada, repetido, repeticao, extrair, acoplamento, responsabilidades, longa, longo, complexidade, simplificar
 load-when: execução
 applies-to: todos os níveis
 priority: refactor — 5ª na ordem do router (abaixo de architecture, acima de code-quality)

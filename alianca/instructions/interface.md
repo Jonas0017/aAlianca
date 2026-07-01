@@ -1,5 +1,6 @@
 ---
 trigger: criar ou alterar qualquer superfície que um humano vê ou usa — tela, página, layout, componente, formulário, fluxo, CLI/TUI, texto de interface ou mensagem de erro
+keywords: tela, telas, pagina, layout, componente, formulario, botao, cli, tui, frontend, acessibilidade, design, interface, usabilidade, menu
 load-when: execução
 applies-to: todos os níveis (a profundidade escala); qualquer superfície humana, gráfica ou não
 priority: interface — junto ao code-quality, é o piso da superfície que o humano usa; acessibilidade não cede a estilo

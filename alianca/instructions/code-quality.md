@@ -1,5 +1,6 @@
 ---
 trigger: antes de commit, ao abrir PR, ou ao finalizar um bloco de código
+keywords: commit, commitar, lint, linter, formatar, formatacao, estilo, style, padrao, padroes, qualidade, precommit, gitignore
 load-when: review
 applies-to: todos os níveis (gates escalam com o nível)
 priority: code-quality — última na ordem do router; é o piso (inclui estilo/formatação)

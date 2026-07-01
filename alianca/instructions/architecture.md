@@ -1,5 +1,6 @@
 ---
 trigger: criar ou alterar a estrutura do projeto — novo módulo, nova camada, fronteira, ou decisão de dependência
+keywords: arquitetura, arquitetural, estrutura, modulo, modulos, camada, camadas, fronteira, dependencia, dependencias, servico, servicos, boundary, decisao
 load-when: execução
 applies-to: todos os níveis (a profundidade escala; em níveis baixos, mantenha simples)
 priority: architecture (abaixo de testing, acima de refactor)

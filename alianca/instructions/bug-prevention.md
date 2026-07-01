@@ -1,5 +1,6 @@
 ---
 trigger: escrever código com risco de erro — entrada externa, estado mutável, concorrência, integração
+keywords: bug, erro, entrada, externa, validacao, validar, sanitizar, estado, mutavel, concorrencia, race, nulo, excecao, borda, edge, limite, input, integracao
 load-when: execução
 applies-to: todos os níveis
 priority: bug-prevention (acima de testing)

@@ -24,6 +24,14 @@ import os
 import sys
 import unicodedata
 
+# klog: log do kernel (dmesg). Best-effort; se faltar, no-op (nunca quebra o hook).
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from klog import klog
+except Exception:
+    def klog(event, detail):
+        pass
+
 # ---------------------------------------------------------------------------
 # stdout em utf-8 (Windows costuma vir em cp1252)
 # ---------------------------------------------------------------------------
@@ -323,6 +331,7 @@ def main():
         emit(with_coordinator(base_reminder(), tokens, []))
 
     matched = cap_modules(select_modules(index, tokens, norm_prompt))
+    klog("ROUTE", "mods=[{}]".format(", ".join(n for n, _ in matched)))
     emit(with_coordinator(build_block(matched), tokens, matched))
 
 

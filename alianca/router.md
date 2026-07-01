@@ -60,6 +60,7 @@ Todo arquivo em `instructions/` começa com este cabeçalho:
 ```
 ---
 trigger: <condição observável que faz você carregar este módulo>
+keywords: <palavras que o roteador casa no prompt; opcional — se ausente, o compile.py deriva do trigger>
 load-when: bootstrap | execução | review | migração | evolução
 applies-to: <personas e/ou níveis aplicáveis>
 priority: <posição na ordem de precedência>
