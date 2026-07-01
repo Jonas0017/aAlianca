@@ -314,6 +314,42 @@
       "loadWhen": "execução",
       "priority": 2,
       "trigger": "criar ou alterar lógica testável (função, regra de negócio, endpoint, componente)"
+    },
+    "x9": {
+      "file": "instructions/x9.md",
+      "keywords": [
+        "auditar",
+        "auditoria",
+        "beco",
+        "conectar",
+        "dead",
+        "falta",
+        "faltando",
+        "fixme",
+        "fluxo",
+        "inacabado",
+        "incompleto",
+        "incompletos",
+        "integridade",
+        "ligar",
+        "monitorar",
+        "orfa",
+        "orfao",
+        "orfaos",
+        "pendente",
+        "pendentes",
+        "ponta",
+        "pontas",
+        "revisao",
+        "solta",
+        "soltas",
+        "todo",
+        "verificar",
+        "vigiar"
+      ],
+      "loadWhen": "review",
+      "priority": null,
+      "trigger": "auditar o projeto em busca de pontas soltas — coisas criadas, prometidas ou iniciadas pela metade que quebram o fluxo"
     }
   },
   "precedence": [

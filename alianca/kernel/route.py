@@ -215,29 +215,42 @@ def keyword_matches(keyword, tokens, norm_prompt):
 
 
 def select_modules(index, tokens, norm_prompt):
-    """Retorna lista ordenada de (nome, meta) dos modulos que casaram."""
+    """
+    Retorna [(nome, meta, forca)] dos modulos que casaram, ordenados por
+    RELEVANCIA. 'forca' = quantas keywords distintas do modulo casaram — um
+    match especifico (tasks casa 'tarefa'+'nova') vence um match generico
+    (architecture casa so 'nova'), sem precisar curar keyword.
+
+    Ordem: security sempre primeiro se casou (invariante de seguranca: nunca
+    sacrificada); depois por forca desc; empate -> codigo antes de ciclo de
+    vida, depois precedencia, depois nome.
+    """
     modules = index.get("modules", {})
-    matched = []
+    scored = []
     for name, meta in modules.items():
         if not isinstance(meta, dict):
             continue
         keywords = meta.get("keywords") or []
-        for kw in keywords:
-            if keyword_matches(kw, tokens, norm_prompt):
-                matched.append((name, meta))
-                break
+        strength = sum(
+            1 for kw in keywords if keyword_matches(kw, tokens, norm_prompt)
+        )
+        if strength:
+            scored.append((name, meta, strength))
 
     def sort_key(item):
-        name, meta = item
+        name, meta, strength = item
         pr = meta.get("priority")
-        if isinstance(pr, int):
-            # modulos com precedencia primeiro (security=0 no topo)
-            return (0, pr, name)
-        # modulos de ciclo de vida: depois, alfabetico
-        return (1, 0, name)
+        is_code = isinstance(pr, int)
+        return (
+            0 if name == "security" else 1,   # security colado no topo
+            -strength,                          # match mais forte primeiro
+            0 if is_code else 1,                # codigo antes de ciclo de vida
+            pr if is_code else 999,             # precedencia entre os de codigo
+            name,
+        )
 
-    matched.sort(key=sort_key)
-    return matched
+    scored.sort(key=sort_key)
+    return scored
 
 
 def is_execution_intent(tokens, matched):
@@ -263,6 +276,15 @@ def with_coordinator(block, tokens, matched):
     if is_execution_intent(tokens, matched):
         return block + "\n" + COORD_BLOCK
     return block
+
+
+def cap_modules(scored, limit=3):
+    """
+    Teto do scheduler (nao despejar contexto): fica com os 'limit' modulos
+    mais relevantes (scored ja vem ordenado por relevancia). Devolve a lista
+    no formato (nome, meta) que o resto do modulo espera.
+    """
+    return [(name, meta) for (name, meta, _strength) in scored[:limit]]
 
 
 def build_block(matched):
@@ -300,7 +322,7 @@ def main():
         # depende do roteamento de modulos).
         emit(with_coordinator(base_reminder(), tokens, []))
 
-    matched = select_modules(index, tokens, norm_prompt)
+    matched = cap_modules(select_modules(index, tokens, norm_prompt))
     emit(with_coordinator(build_block(matched), tokens, matched))
 
 
