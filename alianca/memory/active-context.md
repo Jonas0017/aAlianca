@@ -14,6 +14,12 @@ Desenvolvimento da **Aliança 2.2** — o próprio harness. Este repo é o produ
 - **18 instruções prontas**, incluindo `tasks`, `questions` e `x9` (auditoria de pontas soltas).
 - **Auditoria X9 + parecer de arquiteto concluídos em 2026-07-01**; correções aplicadas (contagens, precedência com `interface`, fim do corte R≥40 como ativação, reposicionamento honesto "Claude Code first", HANDOFF atualizado, CLAUDE.md da raiz criado). Detalhe em `x9-state.md`.
 - **Validação:** 2 rounds em `VALIDATION.md` (A/B Claude+Copilot · kernel+Ollama local).
+- **Frota atualizada (2026-07-01):** as 6 instalações em campo (`1 bilhão na conta`, `entrega segura`, `Instrutores`, `sacerdotisa`, `videos gnosis`, `teste de harness`) receberam a 2.2 calibrada — selftest 58 PASS provado em cada destino; memórias/snapshots/customizações preservados.
+
+## Aprendizados da atualização em campo (insumo pro plugin)
+
+- **Projetos customizam arquivos distribuídos**: `entrega segura` estendeu `interface.md` (design tokens RN); `sacerdotisa` criou módulo próprio (`docs-governance.md`) e usa launcher `py` no `verify.cmd`. O mecanismo de update precisa de **overlay local** (customização fora dos arquivos que a atualização substitui) — hoje foi merge manual por agente.
+- **Rótulo de versão não reflete o conteúdo**: 3 instalações diziam "2.2" com conteúdo pré-calibração ou pré-kernel. O `router.md`/índice precisa de um identificador de build/revisão junto ao `alianca-version`.
 
 ## Próximos marcos (em ordem)
 
