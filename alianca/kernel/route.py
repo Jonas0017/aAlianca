@@ -45,7 +45,10 @@ except Exception:
 # ---------------------------------------------------------------------------
 HEADER = "== Alianca — roteamento deste turno =="
 LOOP = ("Loop: CHECAR -> CARREGAR -> AGIR -> VERIFICAR -> PERSISTIR. "
-        "Fonte unica de memoria: alianca/memory/.")
+        "Fonte unica de memoria: alianca/memory/.\n"
+        "Papel: voce e o GERENTE — delegue TODA execucao a um subagente (Agent "
+        "tool) e consuma so o resumo; inline apenas roteamento, decisao e "
+        "dialogo (o pai nao poe a mao no codigo).")
 
 # Bloco do MODO COORDENADOR (3o pilar: nao esgotar a janela desta sessao).
 # Injetado so quando o prompt tem cara de EXECUCAO PESADA. Nudge CONDICIONAL:

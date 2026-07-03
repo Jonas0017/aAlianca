@@ -497,6 +497,41 @@ def test_verify_esteira():
 
 
 # ===========================================================================
+# 4a-ter) session_start.py — arranque de conversa nova (kernel + x9)
+# ===========================================================================
+def test_session_start():
+    SS = os.path.join(HERE, "session_start.py")
+    # TRAVA ANTI-RECURSAO: sem esta env, session_start rodaria o selftest -> que
+    # chama test_session_start -> session_start ... (fork-bomb). Com ela, o hook
+    # nao re-roda o selftest e o teste constata so a forma da saida.
+    env = dict(os.environ)
+    env["ALIANCA_SS_NO_SELFTEST"] = "1"
+
+    def run_ss(source):
+        proc = subprocess.run(
+            [PY, SS], input=json.dumps({"source": source}).encode("utf-8"),
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+        return proc.returncode, proc.stdout.decode("utf-8", "replace")
+
+    # (a) source=startup -> injeta additionalContext com kernel + diretriz X9.
+    code, out = run_ss("startup")
+    ok = False
+    try:
+        ctx = json.loads(out)["hookSpecificOutput"]["additionalContext"]
+        ok = ("Kernel:" in ctx and "X9" in ctx)
+    except Exception:
+        ok = False
+    check("session_start/startup: injeta kernel + diretriz X9",
+          code == 0 and ok, "exit={0} out={1!r}".format(code, out[:200]))
+
+    # (b) source=resume -> NAO emite nada (nao repete o arranque/x9).
+    code, out = run_ss("resume")
+    check("session_start/resume: sem output (nao repete o arranque)",
+          code == 0 and out.strip() == "",
+          "exit={0} out={1!r}".format(code, out[:200]))
+
+
+# ===========================================================================
 # 4b) verify.py — portao PERSISTIR (5o passo do loop, em layout isolado)
 # ===========================================================================
 def _iso_now():
@@ -704,6 +739,7 @@ def main():
     test_gate()
     test_verify()
     test_verify_esteira()
+    test_session_start()
     test_persist()
     test_klog()
     test_frontmatter_multiline()
