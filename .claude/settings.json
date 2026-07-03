@@ -1,5 +1,7 @@
 {
   "//": "Forcing function do kernel da Alianca (NextGen). route.py roteia contexto em todo prompt; gate.py bloqueia segredo hardcoded em escritas. Fonte: alianca/kernel/. Para desligar, remova o bloco 'hooks' ou renomeie este arquivo.",
+  "//autoMemory": "Memoria nativa (auto memory) do Claude Code DESATIVADA: competia com alianca/memory/ (viola a Regra Zero do adopt) e causava alucinacao de longo prazo. Fonte unica de memoria = alianca/memory/. Doc: code.claude.com/docs/en/memory.md.",
+  "autoMemoryEnabled": false,
   "hooks": {
     "UserPromptSubmit": [
       {

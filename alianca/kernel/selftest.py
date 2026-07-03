@@ -425,6 +425,78 @@ def test_verify():
 
 
 # ===========================================================================
+# 4a-bis) verify.py — trava da ESTEIRA (bootstrap sem verify.cmd -> BLOCK)
+# ===========================================================================
+def _run_esteira_case(assistant_text, bootstrapped, verify_cmd_line=None,
+                      stop_hook_active=False):
+    """
+    Layout isolado tdir/kernel/verify.py (para MEMORY_ACTIVE resolver em
+    tdir/memory/active-context.md) + opcional tdir/kernel/verify.cmd de fixture
+    + opcional tdir/memory/active-context.md (bootstrapped). Texto do assistant
+    com alegacao de conclusao. Exercita o portao da esteira. Devolve (exit, out).
+    """
+    tdir = tempfile.mkdtemp(prefix="alianca_esteira_")
+    try:
+        kdir = os.path.join(tdir, "kernel")
+        os.makedirs(kdir)
+        shutil.copy(VERIFY, os.path.join(kdir, "verify.py"))
+        shutil.copy(KLOG, os.path.join(kdir, "klog.py"))
+        if verify_cmd_line is not None:
+            with open(os.path.join(kdir, "verify.cmd"), "w", encoding="utf-8") as f:
+                f.write("# fixture verify.cmd (isolado) — nao e o do repo\n")
+                f.write(verify_cmd_line + "\n")
+        if bootstrapped:
+            mdir = os.path.join(tdir, "memory")
+            os.makedirs(mdir)
+            with open(os.path.join(mdir, "active-context.md"), "w", encoding="utf-8") as f:
+                f.write("# contexto\n")
+        transcript = _write_transcript(tdir, assistant_text)
+        payload = {"transcript_path": transcript, "cwd": tdir,
+                   "stop_hook_active": stop_hook_active}
+        proc = subprocess.run(
+            [PY, os.path.join(kdir, "verify.py")],
+            input=json.dumps(payload).encode("utf-8"),
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        )
+        return proc.returncode, proc.stdout.decode("utf-8", "replace")
+    finally:
+        shutil.rmtree(tdir, ignore_errors=True)
+
+
+def test_verify_esteira():
+    CLAIM = "Tudo pronto e implementado."
+    PASS_CMD = 'python -c "import sys; sys.exit(0)"'
+
+    # (a) EM ANDAMENTO (active-context existe) + SEM verify.cmd + claim -> BLOCK.
+    #     E a trava nova: bootstrap sem a esteira armada nao passa no "pronto".
+    code, out = _run_esteira_case(CLAIM, bootstrapped=True, verify_cmd_line=None)
+    check("verify/esteira: bootstrap SEM verify.cmd + claim -> BLOCK (esteira nao armada)",
+          code == 0 and _is_block(out) and "steira" in out,
+          "exit={0} stdout={1!r}".format(code, out[:200]))
+
+    # (b) NAO inicializado (sem active-context) + SEM verify.cmd + claim -> ALLOW.
+    #     Nao trancar o setup no meio: a esteira ainda vai nascer no bootstrap.
+    code, out = _run_esteira_case(CLAIM, bootstrapped=False, verify_cmd_line=None)
+    check("verify/esteira: sem active-context + sem verify.cmd -> ALLOW (setup em curso)",
+          code == 0 and not _is_block(out),
+          "exit={0} stdout={1!r}".format(code, out[:200]))
+
+    # (c) EM ANDAMENTO + verify.cmd que PASSA + claim -> ALLOW (esteira armada e verde).
+    code, out = _run_esteira_case(CLAIM, bootstrapped=True, verify_cmd_line=PASS_CMD)
+    check("verify/esteira: bootstrap + verify.cmd verde -> ALLOW",
+          code == 0 and not _is_block(out),
+          "exit={0} stdout={1!r}".format(code, out[:200]))
+
+    # (d) EM ANDAMENTO + SEM verify.cmd + claim + [verify:skip] -> ALLOW (override).
+    code, out = _run_esteira_case(
+        CLAIM + " [verify:skip legado sem testes ainda]",
+        bootstrapped=True, verify_cmd_line=None)
+    check("verify/esteira: override [verify:skip] fura a trava da esteira -> ALLOW",
+          code == 0 and not _is_block(out),
+          "exit={0} stdout={1!r}".format(code, out[:200]))
+
+
+# ===========================================================================
 # 4b) verify.py — portao PERSISTIR (5o passo do loop, em layout isolado)
 # ===========================================================================
 def _iso_now():
@@ -631,6 +703,7 @@ def main():
     test_broken_edge()
     test_gate()
     test_verify()
+    test_verify_esteira()
     test_persist()
     test_klog()
     test_frontmatter_multiline()

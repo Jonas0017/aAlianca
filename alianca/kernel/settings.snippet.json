@@ -1,6 +1,8 @@
 {
   "//": "SNIPPET REVIEWAVEL -- NAO E UM settings.json ATIVO. Copie os blocos de 'hooks' para o seu .claude/settings.json depois de revisar. Registra os TRES portoes do kernel da Alianca: route.py (roteia contexto no prompt), gate.py (bloqueia segredo hardcoded em escritas) e verify.py (Stop: nao deixa 'pronto' sem prova).",
   "//verify": "O 3o portao (Stop -> verify.py) e OPT-IN: verify.py so bloqueia se existir alianca/kernel/verify.cmd (o comando de verificacao do projeto -- ex.: rodar os testes). Sem esse arquivo, permite tudo (fail-open).",
+  "//autoMemory": "COPIE TAMBEM este campo. Auto memory nativa do Claude Code DESATIVADA: ela reenche a cada sessao e compete com alianca/memory/ (viola a Regra Zero do adopt) -> causa alucinacao de longo prazo. Fonte unica = alianca/memory/. Doc: code.claude.com/docs/en/memory.md.",
+  "autoMemoryEnabled": false,
   "hooks": {
     "UserPromptSubmit": [
       {

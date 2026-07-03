@@ -269,6 +269,19 @@ def persist_reason(payload):
 
 # --- Constatacao (roda o comando de verificacao) --------------------------
 
+def _is_bootstrapped():
+    """
+    True se o projeto ja foi inicializado pela Alianca — sinal = existe
+    alianca/memory/active-context.md (o mesmo criterio de "projeto em
+    andamento" do START-HERE §2). Serve para exigir a esteira armada
+    (verify.cmd) SO em projeto ja inicializado, sem trancar o setup no meio.
+    """
+    try:
+        return os.path.isfile(MEMORY_ACTIVE)
+    except Exception:
+        return False
+
+
 def read_verify_cmd():
     """Primeira linha nao-vazia de verify.cmd, ou None se ausente/vazio."""
     if not os.path.isfile(CMD_FILE):
@@ -409,12 +422,30 @@ def _claim_reason(msg, payload):
         klog("VERIFY", "fail-open: verify.cmd ilegivel ({})".format(type(e).__name__))
         return None
 
-    # Sem comando -> NAO ha como constatar. O portao so BLOQUEIA quando
-    # CONSTATA uma falha (constata, nao pergunta). Sem verify.cmd o
-    # enforcement e opt-in por projeto: PERMITIR. (Ligue configurando
-    # alianca/kernel/verify.cmd com o comando de teste/lint do projeto.)
+    # Sem comando -> NAO ha como constatar rodando. Dois casos:
+    #   (i) projeto EM ANDAMENTO (ha active-context.md): a esteira de testes e
+    #       OBRIGATORIA no onboarding (ver instrucao 'testing' / 'adopt' /
+    #       'setup') e nao foi armada -> BLOQUEIA. E a trava do "nao pode
+    #       falhar": nudge unico (anti-loop por stop_hook_active; furavel por
+    #       [verify:skip motivo]).
+    #  (ii) projeto ainda NAO inicializado (sem active-context.md): estamos no
+    #       meio do setup, antes da esteira nascer -> PERMITIR (nao trancar o
+    #       bootstrap; opt-in ate ele fechar).
     if not cmd:
-        klog("VERIFY", "sem verify.cmd: allow (enforcement opt-in)")
+        if _is_bootstrapped():
+            klog("VERIFY", "esteira nao armada: block (bootstrap sem verify.cmd)")
+            return (
+                "Esteira de testes NAO armada: o projeto esta em andamento "
+                "(alianca/memory/active-context.md existe) mas "
+                "alianca/kernel/verify.cmd nao esta configurado — sem ele o 3o "
+                "portao nao cobra teste verde e o 'pronto' fica sem prova. "
+                "Arme a esteira: aponte alianca/kernel/verify.cmd para o comando "
+                "de teste do projeto (ver a instrucao 'testing', secao 'Esteira "
+                "desde o onboarding'). Se ainda nao ha como testar, registre o "
+                "motivo como tarefa 'A fazer'. Override consciente: "
+                "[verify:skip motivo]."
+            )
+        klog("VERIFY", "sem verify.cmd e sem active-context: allow (projeto nao inicializado)")
         return None
 
     # Verificador nao executavel (infra quebrada) != trabalho errado.

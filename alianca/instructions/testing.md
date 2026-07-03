@@ -16,6 +16,15 @@ Teste não é opcional. É o que separa "achei que funciona" de "funciona". A es
 - **Rode os testes e relate a saída real.** Nunca afirme que passou sem executar (anti-alucinação).
 - **Nunca apague ou pule (`skip`/`xfail`) um teste para ficar verde.** Conserte a causa raiz. Se um skip for inevitável, registre o motivo e a condição de remoção.
 
+## Esteira desde o onboarding (obrigatória e verificada)
+
+A esteira nasce no **bootstrap**, não "depois que der". Isto não pode falhar:
+
+- **Projeto em andamento (`adopt`):** monte a esteira **completa já**, casada ao que o inventário revelou (runner/framework detectado). Há testes? Faça-os rodar. Não há? Crie o mínimo do nível. Nunca deixe o projeto sem esteira "pra depois".
+- **Projeto novo (`setup`):** **entenda primeiro** (persona, eixos, stack — Passos 0–3), **depois** crie a esteira do nível. A ordem importa: sem entender o projeto, a esteira sai errada.
+- **Arme o portão:** aponte **`alianca/kernel/verify.cmd`** para o comando de teste do projeto (de `memory/stack.md`). Sem esse arquivo, o 3º portão (`verify.py`) fica **inerte** e ninguém cobra o verde — é a causa nº1 de "passou sem rodar".
+- **Prova (a trava):** o bootstrap **não fecha** enquanto `verify.cmd` não rodar e voltar **verde**. Se algo real impede (ex.: legado sem como testar ainda), o motivo é **registrado** e vira tarefa *A fazer* — nunca silêncio, nunca "depois" implícito.
+
 ## O que testar
 
 - **Comportamento, não implementação.** Teste o que a função promete, não como ela faz.

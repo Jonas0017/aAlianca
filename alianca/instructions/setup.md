@@ -147,6 +147,7 @@ Eixos:  Estrutura E=__  ·  Longevidade L=__  ·  Risco R=__
 Nível: <0–4>   (regra aplicada: <base | base+1 por risco>)
 Stack: <stack escolhida + 1 frase de porquê>
 Vou criar: <lista de pastas/arquivos do nível>
+Vou armar a esteira: <testes do nível> + verify.cmd; provo verde antes de fechar
 Confirma? (sim / ajustar)
 ```
 
@@ -163,7 +164,7 @@ Após o "sim":
 1. Crie a estrutura do nível.
 2. Escreva `memory/active-context.md` (estado inicial, próximos passos) — **sempre**. A partir do Nível 1, escreva também `memory/vision.md` (o quê, persona, problema, usuários).
 3. **A partir do Nível 1**, gere o snapshot inicial em `snapshots/snapshot-AAAA-MM-DD-setup.md`. No Nível 0 a memória mínima (`active-context.md`) já basta para retomar — ver `START-HERE` §2.
-4. Gere **`memory/stack.md`** — o molde abaixo, preenchido para **este** projeto. É a ponte entre o backbone abstrato e os comandos reais; as instruções `testing` e `code-quality` leem este arquivo para saber qual comando rodar. Configure/instale as ferramentas que você listou nele.
+4. Gere **`memory/stack.md`** — o molde abaixo, preenchido para **este** projeto. É a ponte entre o backbone abstrato e os comandos reais; as instruções `testing` e `code-quality` leem este arquivo para saber qual comando rodar. Configure/instale as ferramentas que você listou nele. **E arme a esteira:** aponte `alianca/kernel/verify.cmd` para o comando de teste do `stack.md`, crie os testes do nível (smoke no 0–1; unit+integração no 2+) e **rode até passar** — o bootstrap **não fecha** sem verde, e sem `verify.cmd` o 3º portão fica inerte (ver `testing` §Esteira desde o onboarding).
 5. Configure higiene mínima: `.gitignore` + `.env.example` (nível ≥ 1).
 6. Configure o **controle de versão** conforme o nível (tabela abaixo).
 7. Atualize o `router.md` se alguma instrução passou a ser relevante para este projeto.

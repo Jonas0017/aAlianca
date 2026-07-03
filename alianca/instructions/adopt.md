@@ -26,6 +26,8 @@ Cada arquivo de memória nativa, após reescrito, **obriga-se** a:
 
 Isto é mais forte que o forcing function (Passo 4): o forcing function injeta o roteamento via mecanismo da ferramenta; a Regra zero garante que a **própria memória do modelo** também o ordene — defesa em profundidade contra "o LLM esquecer a Aliança".
 
+> **Memória que se regenera sozinha → DESATIVAR, não só apontar.** Se a ferramenta tem uma memória automática que volta a gravar a cada sessão, reescrevê-la/apontá-la **não basta**: ela reenche e volta a competir com `alianca/memory/`, e é exatamente isso que produz **alucinação de longo prazo** (o modelo recita estado antigo em vez de reler o arquivo real). Nesses casos, **desative a memória na fonte**. **Claude Code** (*auto memory* em `~/.claude/projects/<repo>/memory/`): grave `"autoMemoryEnabled": false` no `.claude/settings.json` **versionado** do repo (precede o global; alternativa: env `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`) — já incluído no `alianca/kernel/settings.snippet.json`. Só depois de desativada é que `alianca/memory/` fica **de fato** a fonte única. Doc: `code.claude.com/docs/en/memory.md`.
+
 ## Passo 1 — Inventário (não pergunte o que dá para ler)
 
 Levante o estado real antes de qualquer pergunta. **Cite `arquivo:linha`** ao afirmar o que encontrou (anti-alucinação):
@@ -51,7 +53,7 @@ O ponto crítico — é aqui que nascem as "duas memórias":
 
 1. **Mover TODOS os `.md` para dentro da Aliança (obrigatório):** **todo** arquivo `.md` do projeto (`README`, `docs/`, `ARCHITECTURE`, notas soltas, design docs, etc.) é **movido para a Aliança** — o conteúdo ainda verdadeiro é **mesclado e adaptado** nos segmentos de `memory/` (`vision`, `architecture`, `business-rules`, `stack`, `decisions/`), no nível inferido; o obsoleto vai para `archive/` (migrar, nunca apagar). Conflito entre fontes antigas → vale o que o **código** mostra. Não sobra documentação espalhada competindo pela verdade.
 2. **Única exceção — quebraria o projeto → vira ponteiro:** um `.md` cuja remoção **quebra algo** (ex.: `README.md` que o GitHub/registry/empacotamento espera, docs que alimentam um site/gerador, arquivo referenciado pelo build/CI) **permanece no lugar, reduzido a um ponteiro** para a Aliança — uma linha curta tipo *"Fonte da verdade: `alianca/memory/…`"*, sem conteúdo duplicado. Mover só quando é seguro; quando não é, apontar.
-3. **Memória nativa da ferramenta:** aplique a **Regra zero** (acima) — reescreva-a para **mandar seguir a Aliança** e **apontar** para `alianca/memory/` como fonte da verdade; ela não duplica estado de projeto (no máximo guarda fatos de usuário/preferência). Em Claude Code, isto elimina o conflito entre a memória nativa e a da Aliança.
+3. **Memória nativa da ferramenta:** aplique a **Regra zero** (acima) — reescreva-a para **mandar seguir a Aliança** e **apontar** para `alianca/memory/` como fonte da verdade; ela não duplica estado de projeto. **Se for auto-regenerativa (Claude Code *auto memory*), apontar não segura — DESATIVE** (`"autoMemoryEnabled": false` no `.claude/settings.json`; ver Regra zero). Só assim o conflito entre a memória nativa e a da Aliança some de vez.
 
 > **Invariante — fonte única:** depois da adoção existe **uma** memória de projeto ativa (`alianca/memory/`). Nunca duas. Toda outra aponta para ela ou está arquivada.
 
@@ -72,12 +74,13 @@ Vou mover/mesclar TODOS os .md p/ memory/: <README, docs/, ARCHITECTURE, notas�
 Vou REESCREVER a memória nativa (Regra zero): <arquivos> → mandam seguir a Aliança + apontam p/ memory/
 Vou arquivar (obsoleto): <notas vencidas → memory/archive/>
 Vou ligar o "sempre ligado": <CLAUDE.md kernel + hook UserPromptSubmit>
+Vou armar a esteira de testes: <runner detectado> + verify.cmd; provo verde antes de fechar
 Não vou alterar comportamento de código. Confirma? (sim / ajustar)
 ```
 
 ## Passo 6 — Gerar e registrar
 
-Após o "sim": crie a estrutura `alianca/` do nível inferido (ver `setup` Passo 5–7), escreva a `memory/` migrada, instale o forcing function, gere o snapshot inicial `snapshots/snapshot-AAAA-MM-DD-adopt.md` e registre a adoção em `memory/decisions/`. **Semeie o quadro de tarefas** (ver `tasks`) com o que o inventário revelou: o que já existe e funciona entra como *Validada*; pendências/TODOs/issues abertos entram como *A fazer*. A partir daqui, siga o loop do `START-HERE`.
+Após o "sim": crie a estrutura `alianca/` do nível inferido (ver `setup` Passo 5–7), escreva a `memory/` migrada, instale o forcing function, gere o snapshot inicial `snapshots/snapshot-AAAA-MM-DD-adopt.md` e registre a adoção em `memory/decisions/`. **Semeie o quadro de tarefas** (ver `tasks`) com o que o inventário revelou: o que já existe e funciona entra como *Validada*; pendências/TODOs/issues abertos entram como *A fazer*. **Arme a esteira de testes (obrigatório):** monte a esteira **completa** casada ao runner detectado no inventário, aponte `alianca/kernel/verify.cmd` para o comando de teste e **prove verde** rodando — a adoção **não fecha** sem isso, e sem `verify.cmd` o 3º portão fica inerte (ver `testing` §Esteira desde o onboarding). Se o projeto ainda não tem como testar, registre o porquê como tarefa *A fazer*, nunca deixe implícito. A partir daqui, siga o loop do `START-HERE`.
 
 ## Para P0 (leigo)
 
