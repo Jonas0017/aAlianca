@@ -1,0 +1,170 @@
+[
+  {
+    "ctx": 800,
+    "cond": "baseline",
+    "rep": 0,
+    "met": 2,
+    "present": 4,
+    "detail": {
+      "valida_email": false,
+      "valida_senha": false,
+      "valida_cep": false,
+      "valida_telefone": false,
+      "valida_url": false,
+      "valida_data": false,
+      "valida_idade": true,
+      "so_letras": true,
+      "valida_hex": false,
+      "valida_cartao": false
+    },
+    "secs": 147.4,
+    "err": ""
+  },
+  {
+    "ctx": 800,
+    "cond": "alianca",
+    "rep": 0,
+    "met": 10,
+    "present": 10,
+    "detail": {
+      "valida_email": true,
+      "valida_senha": true,
+      "valida_cep": true,
+      "valida_telefone": true,
+      "valida_url": true,
+      "valida_data": true,
+      "valida_idade": true,
+      "so_letras": true,
+      "valida_hex": true,
+      "valida_cartao": true
+    },
+    "secs": 344.6,
+    "err": ""
+  },
+  {
+    "ctx": 1500,
+    "cond": "baseline",
+    "rep": 0,
+    "met": 0,
+    "present": 0,
+    "detail": {
+      "valida_email": false,
+      "valida_senha": false,
+      "valida_cep": false,
+      "valida_telefone": false,
+      "valida_url": false,
+      "valida_data": false,
+      "valida_idade": false,
+      "so_letras": false,
+      "valida_hex": false,
+      "valida_cartao": false
+    },
+    "secs": 226.8,
+    "err": ""
+  },
+  {
+    "ctx": 1500,
+    "cond": "alianca",
+    "rep": 0,
+    "met": 10,
+    "present": 10,
+    "detail": {
+      "valida_email": true,
+      "valida_senha": true,
+      "valida_cep": true,
+      "valida_telefone": true,
+      "valida_url": true,
+      "valida_data": true,
+      "valida_idade": true,
+      "so_letras": true,
+      "valida_hex": true,
+      "valida_cartao": true
+    },
+    "secs": 320.3,
+    "err": ""
+  },
+  {
+    "ctx": 3000,
+    "cond": "baseline",
+    "rep": 0,
+    "met": 6,
+    "present": 10,
+    "detail": {
+      "valida_email": true,
+      "valida_senha": true,
+      "valida_cep": false,
+      "valida_telefone": false,
+      "valida_url": true,
+      "valida_data": true,
+      "valida_idade": true,
+      "so_letras": true,
+      "valida_hex": false,
+      "valida_cartao": false
+    },
+    "secs": 267.7,
+    "err": ""
+  },
+  {
+    "ctx": 3000,
+    "cond": "alianca",
+    "rep": 0,
+    "met": 10,
+    "present": 10,
+    "detail": {
+      "valida_email": true,
+      "valida_senha": true,
+      "valida_cep": true,
+      "valida_telefone": true,
+      "valida_url": true,
+      "valida_data": true,
+      "valida_idade": true,
+      "so_letras": true,
+      "valida_hex": true,
+      "valida_cartao": true
+    },
+    "secs": 287.8,
+    "err": ""
+  },
+  {
+    "ctx": 20000,
+    "cond": "baseline",
+    "rep": 0,
+    "met": 0,
+    "present": 0,
+    "detail": {
+      "valida_email": false,
+      "valida_senha": false,
+      "valida_cep": false,
+      "valida_telefone": false,
+      "valida_url": false,
+      "valida_data": false,
+      "valida_idade": false,
+      "so_letras": false,
+      "valida_hex": false,
+      "valida_cartao": false
+    },
+    "secs": 223.9,
+    "err": ""
+  },
+  {
+    "ctx": 20000,
+    "cond": "alianca",
+    "rep": 0,
+    "met": 10,
+    "present": 10,
+    "detail": {
+      "valida_email": true,
+      "valida_senha": true,
+      "valida_cep": true,
+      "valida_telefone": true,
+      "valida_url": true,
+      "valida_data": true,
+      "valida_idade": true,
+      "so_letras": true,
+      "valida_hex": true,
+      "valida_cartao": true
+    },
+    "secs": 291.5,
+    "err": ""
+  }
+]

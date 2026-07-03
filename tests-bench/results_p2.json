@@ -1,0 +1,130 @@
+[
+  {
+    "ctx": 1200,
+    "cond": "baseline",
+    "rep": 0,
+    "score": 4,
+    "verify": {
+      "catalogo": true,
+      "desconto": true,
+      "pedido": false,
+      "total_ok": false,
+      "total_val": null,
+      "err": "|ped:AttributeError(\"module 'pedido' has no attribute 'finalizar'\")"
+    },
+    "secs": 77.2,
+    "err": "|ped:AttributeError(\"module 'pedido' has no attribute 'finalizar'\")"
+  },
+  {
+    "ctx": 1200,
+    "cond": "baseline",
+    "rep": 1,
+    "score": 4,
+    "verify": {
+      "catalogo": true,
+      "desconto": true,
+      "pedido": false,
+      "total_ok": false,
+      "total_val": null,
+      "err": "|ped:AttributeError(\"module 'pedido' has no attribute 'finalizar'\")"
+    },
+    "secs": 72.3,
+    "err": "|ped:AttributeError(\"module 'pedido' has no attribute 'finalizar'\")"
+  },
+  {
+    "ctx": 1200,
+    "cond": "alianca",
+    "rep": 0,
+    "score": 10,
+    "verify": {
+      "catalogo": true,
+      "desconto": true,
+      "pedido": true,
+      "total_ok": true,
+      "total_val": 85.8,
+      "err": ""
+    },
+    "secs": 70.3,
+    "err": ""
+  },
+  {
+    "ctx": 1200,
+    "cond": "alianca",
+    "rep": 1,
+    "score": 10,
+    "verify": {
+      "catalogo": true,
+      "desconto": true,
+      "pedido": true,
+      "total_ok": true,
+      "total_val": 85.8,
+      "err": ""
+    },
+    "secs": 79.6,
+    "err": ""
+  },
+  {
+    "ctx": 20000,
+    "cond": "baseline",
+    "rep": 0,
+    "score": 10,
+    "verify": {
+      "catalogo": true,
+      "desconto": true,
+      "pedido": true,
+      "total_ok": true,
+      "total_val": 85.8,
+      "err": ""
+    },
+    "secs": 65.5,
+    "err": ""
+  },
+  {
+    "ctx": 20000,
+    "cond": "baseline",
+    "rep": 1,
+    "score": 10,
+    "verify": {
+      "catalogo": true,
+      "desconto": true,
+      "pedido": true,
+      "total_ok": true,
+      "total_val": 85.8,
+      "err": ""
+    },
+    "secs": 59.9,
+    "err": ""
+  },
+  {
+    "ctx": 20000,
+    "cond": "alianca",
+    "rep": 0,
+    "score": 10,
+    "verify": {
+      "catalogo": true,
+      "desconto": true,
+      "pedido": true,
+      "total_ok": true,
+      "total_val": 85.8,
+      "err": ""
+    },
+    "secs": 80.9,
+    "err": ""
+  },
+  {
+    "ctx": 20000,
+    "cond": "alianca",
+    "rep": 1,
+    "score": 10,
+    "verify": {
+      "catalogo": true,
+      "desconto": true,
+      "pedido": true,
+      "total_ok": true,
+      "total_val": 85.8,
+      "err": ""
+    },
+    "secs": 80.5,
+    "err": ""
+  }
+]

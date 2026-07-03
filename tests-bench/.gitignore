@@ -1,0 +1,5 @@
+# artefatos de execução — não versionar
+work_*/
+*.log
+__pycache__/
+_tmp_verify.py
