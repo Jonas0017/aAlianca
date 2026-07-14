@@ -34,6 +34,20 @@ Os agentes escalam com o nível (nenhum no 0–1; QA/documentação opcional no 
 - **Claude Code:** especialista = subagent (tool Agent); o resumo retornado **é** o handoff. Lance em paralelo só frentes independentes (que não editam os mesmos arquivos).
 - **Genérico:** sessões/roles separadas com prompt dedicado; o coordinator junta os resumos.
 
+## Resolução por escopo (memória federada)
+
+Com a memória **federada** por microprojetos (ver `microproject`), a resolução de um agente/especialista segue a mesma hierarquia da memória — **local → raiz → genérico**:
+
+1. **Local:** se o **escopo ativo** é um microprojeto e ele define um agente próprio para a frente (em `microprojects/<slug>/`), use-o — ele carrega o contexto local (memória do microprojeto).
+2. **Raiz:** senão, use o agente equivalente definido na raiz (compartilhado por todos os escopos).
+3. **Genérico:** senão, o agente de propósito geral.
+
+O especialista opera no **escopo ativo**: lê/escreve na memória daquele escopo (`microprojects/<slug>/memory/` ou `alianca/memory/`), nunca cruza fronteiras sem passar pela raiz.
+
+### Hoisting de agentes (local → raiz, no 2º consumidor)
+
+Um agente nasce **local** no microprojeto que precisou dele. Só sobe para a raiz quando um **segundo** escopo passa a precisar do mesmo especialista (regra do 2º consumidor — a mesma do hoisting de memória em `microproject`). Ao promover: mova a definição para a raiz, deixe um **stub/ponteiro** no local e registre a aresta em `registry.json.hoisted`. Um agente usado por um escopo só **não** é candidato a hoisting — YAGNI.
+
 ## Para P0 (leigo)
 
 Invisível. Não exponha o conceito de "agentes"; apenas relate o produto.

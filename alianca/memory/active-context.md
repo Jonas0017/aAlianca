@@ -6,9 +6,10 @@
 
 Desenvolvimento da **Aliança 2.2** — o próprio harness. Este repo é o produto; `alianca/` é a implementação de referência que os projetos-alvo copiam.
 
-## Onde estamos (2026-07-02)
+## Onde estamos (2026-07-14)
 
-- **Kernel operacional** — 3 portões (Claude Code): `route.py` (UserPromptSubmit) · `gate.py` (PreToolUse) · `verify.py` (Stop), + `klog`/`kernel.log`, `selftest.py` (58 PASS), `compile.py` (gera `router.index.json` com grafo `pulls`). Decisões e detalhe: git + `x9-state.md`.
+- **Memória federada por microprojetos (bounded context) — CONCLUÍDO (2026-07-14):** a memória da raiz nunca mais sobrecarrega num sistema completo — tudo nasce **local** no microprojeto; a raiz só recebe o compartilhável (regra do 2º consumidor / hoisting com stub). Microprojeto é **opt-in, nível ≥ 2, sempre proposto**. Route manager do kernel virou **scope-aware**: escopo primário = marcador `ACTIVE` + pista `[mp:<slug>]` no prompt (cwd é bônus); slug precisa estar no `registry.json` senão degrada pra raiz. Novos: `kernel/scope.py` (resolve_scope/merge_indices/validate_graph, módulo puro), `instructions/microproject.md`, `microprojects/{registry.json,ACTIVE,README.md}`. Alterados: route/verify/compile/session_start/selftest, router.md, START-HERE §5, memory/README, x9/snapshot. **Selftest 64→89 PASS, exit 0**; fail-open e back-compat verificados. Decisão em `memory/decisions/`; snapshot inicial em `snapshots/`. Follow-up aberto: ver "Próximo passo pendente".
+- **Kernel operacional** — 3 portões (Claude Code): `route.py` (UserPromptSubmit) · `gate.py` (PreToolUse) · `verify.py` (Stop), + `klog`/`kernel.log`, `selftest.py` (**89 PASS**), `compile.py` (gera `router.index.json` com grafo `pulls`). Decisões e detalhe: git + `x9-state.md`.
 - **18 instruções prontas** (inclui `tasks`, `questions`, `x9`). Roteador calibrado (keywords curadas + força mínima 2 p/ derivadas). Auditoria X9 + parecer de arquiteto fechados — `x9-state.md`.
 - **Validação** (`VALIDATION.md` + benchmark Ollama `qwen2.5-coder:7b`): confirma a tese central — **o diferencial só aparece no longo prazo, quando o trabalho excede a janela.** Sob pressão de contexto, SEM alucina o contrato (integração 0%); COM mantém 100%. Em janela folgada, empatam (prova anti-viés: a diferença vem só da pressão). Números completos: `RELATORIO-FINAL-alianca.md`, `RELATORIO-fase1-longo-prazo.md`, `RELATORIO-teste-alianca.md` (raiz).
 - **Frota:** 6 instalações em campo com a 2.2 calibrada (selftest 58 PASS em cada; memórias/customizações preservadas).
@@ -29,6 +30,10 @@ Pronto pra disparar: `PROXIMOS-TESTES.md` + `tests-bench/run_overnight.sh` (`! b
 - **B+C** (auto): projeto 3-arquivos em 4 condições 2×2 (isola disco vs disciplina-de-prompt) + tokens/ROI — `tests-bench/phase2_overnight.py`.
 - **A'** (auto): curva de retenção mais fina, mais reps — `tests-bench/longhorizon.py`.
 - **D** (supervisionado, não noturno): kernel real (hooks + subagentes) dirigindo Claude Code numa tarefa longa — falta pra sair de "o princípio funciona" → "o produto funciona".
+
+## Próximo passo pendente (follow-up da federação)
+
+- **Esteira local por escopo:** o `CMD_FILE`/`verify.cmd` do Stop hook (`verify.py`) ainda roda **sempre a esteira da RAIZ** — não seleciona a esteira local do microprojeto ativo. Follow-up curto: resolver `CMD_FILE` via `scope.py` no `verify.py`. (Detalhe e decisão residual: `memory/decisions/`.)
 
 ## Próximos marcos (em ordem)
 

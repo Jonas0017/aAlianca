@@ -25,6 +25,14 @@ O harness é um sistema vivo. O nível do `setup` é só a **estimativa inicial*
 
 - Estrutura ociosa (pastas/arquivos do nível sem uso real) e complexidade caiu de forma estável.
 
+## Gatilho de federação (memória plana inchada → microprojeto)
+
+Migração não é só de nível: a **memória** também evolui. Quando a memória plana da raiz incha — o `memory/active-context.md` já mistura **≥ 2 bounded contexts** distintos, ou um subsistema independente passou a acumular decisões/tarefas próprias que não interessam ao resto — é sinal de **federar**.
+
+- **Gatilho:** ≥ 2 bounded contexts convivendo no `active-context.md`, ou uma frente independente que já pesa na memória principal.
+- **Ação:** carregue `microproject` e **proponha** (nível ≥ 2, nunca automático) extrair o **1º bounded context** para `alianca/microprojects/<slug>/`, movendo a memória daquela frente para lá.
+- **Aditivo e reversível:** o conhecimento se **move** (raiz → microprojeto), não se perde; concluir/rebaixar arquiva de volta (ver `microproject` §CONCLUIR). A raiz continua sendo o **fallback compartilhado**.
+
 ## Procedimento
 
 1. **Reavalie os 3 eixos** (E, L, R) com a rubrica do `setup` — os números mudaram?

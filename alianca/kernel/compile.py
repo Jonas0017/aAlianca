@@ -72,6 +72,9 @@ STOPWORDS = {
 ALIANCA_DIR = Path(__file__).resolve().parent.parent
 INSTRUCTIONS_DIR = ALIANCA_DIR / "instructions"
 INDEX_PATH = ALIANCA_DIR / "router.index.json"
+# Memoria FEDERADA: cada microprojeto pode ter instructions/ locais, compiladas
+# para um router.index.json local (o merge no route.py sobrepoe a raiz por nome).
+MICROPROJECTS_DIR = ALIANCA_DIR / "microprojects"
 
 
 # ---------------------------------------------------------------------------
@@ -223,16 +226,16 @@ def write_text(path, content):
 # Main
 # ---------------------------------------------------------------------------
 
-def main():
-    if not INSTRUCTIONS_DIR.is_dir():
-        print(f"ERRO: nao encontrei {INSTRUCTIONS_DIR}", file=sys.stderr)
-        return 1
-
-    md_files = sorted(INSTRUCTIONS_DIR.glob("*.md"), key=lambda p: p.name)
-
+def build_modules(instructions_dir, file_prefix):
+    """
+    Compila todos os *.md de 'instructions_dir' em {nome: entry}, com o campo
+    'file' prefixado por 'file_prefix' (RELATIVO a alianca/). Devolve
+    (modules, skipped). Mesma logica p/ a raiz e p/ cada microprojeto — a unica
+    diferenca e o prefixo do caminho.
+    """
     modules = {}
     skipped = []
-
+    md_files = sorted(instructions_dir.glob("*.md"), key=lambda p: p.name)
     for path in md_files:
         name = path.stem
         text = path.read_text(encoding="utf-8")
@@ -260,7 +263,7 @@ def main():
         pulls = [p.strip() for p in re.split(r"[,;]", fm.get("pulls", "")) if p.strip()]
 
         entry = {
-            "file": f"instructions/{name}.md",
+            "file": f"{file_prefix}{name}.md",
             "trigger": trigger,
             "keywords": keywords,
             "loadWhen": load_when,
@@ -274,6 +277,46 @@ def main():
         if pulls:
             entry["pulls"] = pulls
         modules[name] = entry
+    return modules, skipped
+
+
+def _compile_microprojects():
+    """
+    Compila as instructions/ locais de cada microprojeto para um
+    router.index.json local (idempotente). Devolve a lista de slugs compilados.
+    Ausencia de microprojects/ ou de instructions/ locais e o caso comum
+    (silencioso). Robusto: um microprojeto quebrado nao derruba o compile.
+    """
+    compiled = []
+    if not MICROPROJECTS_DIR.is_dir():
+        return compiled
+    for sub in sorted(MICROPROJECTS_DIR.iterdir()):
+        if not sub.is_dir():
+            continue
+        local_instr = sub / "instructions"
+        if not local_instr.is_dir():
+            continue
+        prefix = f"microprojects/{sub.name}/instructions/"
+        local_mods, _sk = build_modules(local_instr, prefix)
+        local_index = {
+            "indexFormatVersion": INDEX_FORMAT_VERSION,
+            "generatedFrom": f"microprojects/{sub.name}/instructions/*.md",
+            "precedence": PRECEDENCE,
+            "modules": local_mods,
+        }
+        local_text = json.dumps(
+            local_index, sort_keys=True, indent=2, ensure_ascii=False) + "\n"
+        write_text(sub / "router.index.json", local_text)
+        compiled.append(sub.name)
+    return compiled
+
+
+def main():
+    if not INSTRUCTIONS_DIR.is_dir():
+        print(f"ERRO: nao encontrei {INSTRUCTIONS_DIR}", file=sys.stderr)
+        return 1
+
+    modules, skipped = build_modules(INSTRUCTIONS_DIR, "instructions/")
 
     index = {
         "indexFormatVersion": INDEX_FORMAT_VERSION,
@@ -290,11 +333,15 @@ def main():
     ) + "\n"
     write_text(INDEX_PATH, index_text)
 
+    compiled_mps = _compile_microprojects()
+
     # ------------------------------------------------------------------
     # Resumo
     # ------------------------------------------------------------------
     print(f"Alianca compile — {INDEX_PATH.name} gerado.")
     print(f"  Modulos indexados: {len(modules)}")
+    if compiled_mps:
+        print(f"  Microprojetos compilados: {', '.join(compiled_mps)}")
     if skipped:
         print(f"  AVISO: {len(skipped)} arquivo(s) sem frontmatter valido "
               f"(pulados): {', '.join(skipped)}")

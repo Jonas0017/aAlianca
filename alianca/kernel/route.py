@@ -32,6 +32,29 @@ except Exception:
     def klog(event, detail):
         pass
 
+# scope: resolucao do ESCOPO ATIVO (raiz vs microprojeto) — memoria federada.
+# Modulo PURO (sem efeito colateral de import). Se faltar/quebrar, DEGRADA para
+# a raiz sempre (fail-open): o roteamento nunca pode travar a sessao.
+try:
+    import scope as _scope
+    resolve_scope = _scope.resolve_scope
+    merge_indices = _scope.merge_indices
+    _memory_dir_rel = _scope.memory_dir_rel
+    _MICROPROJECTS_DIR = _scope.MICROPROJECTS_DIR
+    _ALIANCA_DIR = _scope.ALIANCA_DIR
+except Exception:
+    def resolve_scope(cwd, prompt, registry=None):
+        return None
+
+    def merge_indices(root, local):
+        return root
+
+    def _memory_dir_rel(scope):
+        return "memory"
+
+    _ALIANCA_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    _MICROPROJECTS_DIR = os.path.join(_ALIANCA_DIR, "microprojects")
+
 # ---------------------------------------------------------------------------
 # stdout em utf-8 (Windows costuma vir em cp1252)
 # ---------------------------------------------------------------------------
@@ -44,11 +67,28 @@ except Exception:
 # Textos fixos
 # ---------------------------------------------------------------------------
 HEADER = "== Alianca — roteamento deste turno =="
-LOOP = ("Loop: CHECAR -> CARREGAR -> AGIR -> VERIFICAR -> PERSISTIR. "
-        "Fonte unica de memoria: alianca/memory/.\n"
-        "Papel: voce e o GERENTE — delegue TODA execucao a um subagente (Agent "
-        "tool) e consuma so o resumo; inline apenas roteamento, decisao e "
-        "dialogo (o pai nao poe a mao no codigo).")
+
+
+def _mem_display(scope):
+    """Pasta de memoria do escopo, formatada 'alianca/.../' para exibicao."""
+    try:
+        return "alianca/" + _memory_dir_rel(scope) + "/"
+    except Exception:
+        return "alianca/memory/"
+
+
+def loop_text(scope=None):
+    """
+    Linha do LOOP + fonte de memoria DO ESCOPO ATIVO (nao mais fixa na raiz).
+    A raiz continua sendo o fallback COMPARTILHADO.
+    """
+    return ("Loop: CHECAR -> CARREGAR -> AGIR -> VERIFICAR -> PERSISTIR. "
+            "Fonte de memoria deste escopo: {0}; fallback compartilhado: "
+            "alianca/memory/.\n"
+            "Papel: voce e o GERENTE — delegue TODA execucao a um subagente "
+            "(Agent tool) e consuma so o resumo; inline apenas roteamento, "
+            "decisao e dialogo (o pai nao poe a mao no codigo).").format(
+                _mem_display(scope))
 
 # Bloco do MODO COORDENADOR (3o pilar: nao esgotar a janela desta sessao).
 # Injetado so quando o prompt tem cara de EXECUCAO PESADA. Nudge CONDICIONAL:
@@ -132,17 +172,21 @@ def emit(additional_context):
     sys.exit(0)
 
 
-def base_reminder():
-    """Lembrete base: so o loop + fonte de memoria."""
-    return HEADER + "\n" + LOOP
+def base_reminder(scope=None):
+    """Lembrete base: so o loop + fonte de memoria (do escopo ativo)."""
+    return HEADER + "\n" + loop_text(scope)
 
 
-def read_prompt():
+def read_payload():
     """
-    Extrai o texto do prompt do usuario.
-    1) stdin (JSON do hook, campo 'prompt').
-    2) fallback: sys.argv juntos.
-    3) None se nada disponivel.
+    Le o stdin do hook UMA vez e devolve (prompt, cwd).
+
+    Precisamos dos DOIS: o prompt (roteamento + pista [mp:x]) e o cwd (sinal
+    bonus de escopo). Le o stdin uma unica vez (consumo unico) e cai para os
+    fallbacks:
+      - prompt: stdin JSON 'prompt' -> stdin cru -> sys.argv -> None;
+      - cwd:    stdin JSON 'cwd'    -> None.
+    Nunca lanca.
     """
     raw = ""
     try:
@@ -150,43 +194,63 @@ def read_prompt():
     except Exception:
         raw = ""
 
+    prompt = None
+    cwd = None
     if raw and raw.strip():
         try:
             data = json.loads(raw)
             if isinstance(data, dict):
                 p = data.get("prompt")
                 if isinstance(p, str) and p.strip():
-                    return p
-            # JSON valido mas sem prompt utilizavel -> cai pro fallback
+                    prompt = p
+                c = data.get("cwd")
+                if isinstance(c, str) and c.strip():
+                    cwd = c
+            # JSON valido mas sem prompt -> cai pro fallback de argv
         except Exception:
             # stdin nao era JSON: trata o texto cru como prompt
-            return raw
+            prompt = raw
 
-    if len(sys.argv) > 1:
+    if prompt is None and len(sys.argv) > 1:
         arg = " ".join(sys.argv[1:]).strip()
         if arg:
-            return arg
+            prompt = arg
 
-    return None
+    return prompt, cwd
 
 
-def load_index():
-    """
-    Carrega alianca/router.index.json resolvido via __file__:
-    kernel/route.py -> sobe pra alianca/ -> router.index.json.
-    Retorna dict ou None (nunca lanca).
-    """
+def _read_index_file(path):
+    """Le um router.index.json valido de 'path', ou None (nunca lanca)."""
     try:
-        kernel_dir = os.path.dirname(os.path.abspath(__file__))
-        alianca_dir = os.path.dirname(kernel_dir)
-        index_path = os.path.join(alianca_dir, "router.index.json")
-        with open(index_path, "r", encoding="utf-8") as fh:
+        with open(path, "r", encoding="utf-8") as fh:
             data = json.load(fh)
         if isinstance(data, dict) and isinstance(data.get("modules"), dict):
             return data
     except Exception:
         pass
     return None
+
+
+def load_index(scope=None):
+    """
+    Carrega o indice da RAIZ (alianca/router.index.json). Se o escopo for um
+    microprojeto com router.index.json LOCAL, sobrepoe por nome (local
+    substitui; so-raiz continua como fallback). Sem scope -> raiz pura
+    (back-compat exato). Retorna dict ou None (nunca lanca).
+    """
+    root = _read_index_file(os.path.join(_ALIANCA_DIR, "router.index.json"))
+    if scope:
+        try:
+            local = _read_index_file(
+                os.path.join(_MICROPROJECTS_DIR, scope, "router.index.json"))
+            if local:
+                merged = merge_indices(root, local)
+                if isinstance(merged, dict) and isinstance(
+                        merged.get("modules"), dict):
+                    return merged
+        except Exception:
+            pass
+    return root
 
 
 def short_hint(trigger):
@@ -377,23 +441,52 @@ def expand_pulls(selected, index, ceiling=5):
         return directs
 
 
-def build_block(expanded):
+def scope_label(scope):
+    """Rotulo humano do escopo para o cabecalho/klog."""
+    return scope if scope else "raiz"
+
+
+def resolve_instruction_path(name, meta, scope):
+    """
+    Resolve o caminho da instrucao LOCAL-PRIMEIRO. Se o escopo tem o arquivo
+    local (indice local ja traz o path 'microprojects/...', ou existe uma
+    sobreposicao fisica em microprojects/<slug>/<rel>), aponta pra ele; senao,
+    cai para o caminho da raiz (fallback compartilhado). Nunca lanca.
+    """
+    rel = str(meta.get("file") or ("instructions/" + name + ".md")).lstrip("/")
+    if scope:
+        try:
+            if rel.startswith("microprojects/"):
+                return "alianca/" + rel
+            local_rel = "microprojects/{0}/{1}".format(scope, rel)
+            local_abs = os.path.join(_ALIANCA_DIR, *local_rel.split("/"))
+            if os.path.isfile(local_abs):
+                return "alianca/" + local_rel
+        except Exception:
+            pass
+    return "alianca/" + rel
+
+
+def build_block(expanded, scope=None):
     """
     Monta o bloco compacto de roteamento.
 
     Aceita itens (name, meta, pulled_by) de expand_pulls (ou 2-tuplas legadas).
     Quando pulled_by, anexa a dica "(puxado por <pulled_by>)" na linha.
+    Emite o cabecalho 'Escopo ativo: <slug|raiz>' e resolve cada caminho de
+    instrucao local-primeiro.
     """
     if not expanded:
-        return base_reminder()
+        return base_reminder(scope)
 
-    lines = [HEADER, "Carregue ANTES de agir (ordem de precedencia):"]
+    lines = [HEADER,
+             "Escopo ativo: {0}".format(scope_label(scope)),
+             "Carregue ANTES de agir (ordem de precedencia):"]
     for item in expanded:
         name = item[0]
         meta = item[1]
         pulled_by = item[2] if len(item) > 2 else None
-        rel = meta.get("file") or ("instructions/" + name + ".md")
-        path = "alianca/" + str(rel).lstrip("/")
+        path = resolve_instruction_path(name, meta, scope)
         hint = short_hint(meta.get("trigger"))
         prov = "  (puxado por {0})".format(pulled_by) if pulled_by else ""
         if hint:
@@ -402,7 +495,7 @@ def build_block(expanded):
             )
         else:
             lines.append("  * {0} -> {1}{2}".format(name, path, prov))
-    lines.append(LOOP)
+    lines.append(loop_text(scope))
     return "\n".join(lines)
 
 
@@ -410,18 +503,26 @@ def build_block(expanded):
 # main
 # ---------------------------------------------------------------------------
 def main():
-    prompt = read_prompt()
+    prompt, cwd = read_payload()
+
+    # Escopo ATIVO deste turno (fail-open p/ raiz). Resolve ANTES do early-exit
+    # para que ate o lembrete base traga a memoria do escopo certo.
+    try:
+        scope = resolve_scope(cwd, prompt)
+    except Exception:
+        scope = None
+
     if not prompt:
-        emit(base_reminder())
+        emit(base_reminder(scope))
 
     tokens = tokenize(prompt)
     norm_prompt = strip_accents(prompt)
 
-    index = load_index()
+    index = load_index(scope)
     if not index:
         # Sem indice ainda conseguimos avaliar o modo coordenador (nao
         # depende do roteamento de modulos).
-        emit(with_coordinator(base_reminder(), tokens, []))
+        emit(with_coordinator(base_reminder(scope), tokens, []))
 
     matched = cap_modules(select_modules(index, tokens, norm_prompt))
     expanded = expand_pulls(matched, index)
@@ -429,14 +530,15 @@ def main():
     pulls = [n for (n, _m, by) in expanded if by is not None]
     klog(
         "ROUTE",
-        "mods=[{}] pulls=[{}]".format(", ".join(directs), ", ".join(pulls)),
+        "scope={} mods=[{}] pulls=[{}]".format(
+            scope_label(scope), ", ".join(directs), ", ".join(pulls)),
     )
     # O gate do coordenador avalia a intencao sobre os modulos DIRETOS
     # (matched), nao sobre os puxados pelo grafo: pulls de codigo (ex.:
     # security -> testing, bug-prevention) nao devem inflar o heuristico
     # "2+ modulos de codigo" e disparar o coordenador espuriamente. O grafo
     # (expanded) segue intacto no build_block.
-    emit(with_coordinator(build_block(expanded), tokens, matched))
+    emit(with_coordinator(build_block(expanded, scope), tokens, matched))
 
 
 if __name__ == "__main__":

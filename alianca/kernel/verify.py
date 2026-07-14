@@ -36,12 +36,32 @@ import json
 import shutil
 import subprocess
 
+# stdin do hook e importado antes de reembrulhar stdout; garantimos o dir do
+# kernel no sys.path para achar klog/scope quando rodado como script isolado.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 # --- klog: importa; se falhar, no-op local (um log nunca quebra o hook) ----
 try:
     from klog import klog  # mesmo diretorio (alianca/kernel/)
 except Exception:  # pragma: no cover
     def klog(event, detail):
         pass
+
+# --- scope: memoria FEDERADA. Resolve o escopo ativo (raiz vs microprojeto)
+#     para cobrar a memoria do escopo CERTO. Modulo puro (sem efeito colateral
+#     de import). Se faltar/quebrar, DEGRADA para a raiz (fail-open). ----------
+try:
+    from scope import resolve_scope, memory_active_path, memory_dir_rel
+except Exception:  # pragma: no cover
+    def resolve_scope(cwd, prompt, registry=None):
+        return None
+
+    def memory_dir_rel(scope):
+        return "memory"
+
+    def memory_active_path(scope, base_dir=None):
+        here = os.path.dirname(os.path.abspath(__file__))
+        return os.path.join(os.path.dirname(here), "memory", "active-context.md")
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -131,7 +151,6 @@ def last_assistant_text(transcript_path):
 # transcript), o Stop bloqueia 1x mandando persistir. Anti-loop garantido
 # pelo stop_hook_active (checado antes, no main). Fail-open em tudo.
 
-MEMORY_ACTIVE = os.path.join(os.path.dirname(HERE), "memory", "active-context.md")
 WRITE_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
 # "Substancial" = pelo menos N usos de ferramenta de escrita no projeto.
 # 1 edit trivial nao obriga a persistir; 2+ ja e trabalho que merece memoria.
@@ -166,7 +185,12 @@ def _is_project_write(path, cwd):
     if not path:
         return False
     low = str(path).replace("\\", "/").lower()
+    # Escritas em QUALQUER pasta de memoria de escopo NAO contam como trabalho a
+    # persistir (persistir a memoria e o remedio, nao o sintoma): a raiz
+    # (alianca/memory/) E a de cada microprojeto (microprojects/<slug>/memory/).
     if "alianca/memory/" in low:
+        return False
+    if re.search(r"microprojects/[^/]+/memory/", low):
         return False
     try:
         if cwd and os.path.isabs(path):
@@ -222,18 +246,22 @@ def _scan_transcript_writes(transcript_path, cwd):
     return writes, session_start
 
 
-def persist_reason(payload):
+def persist_reason(payload, scope=None):
     """
     Portao PERSISTIR. Retorna a razao de bloqueio (str) ou None (permitir).
-    So constata: nunca levanta para o chamador alem do try do main.
+    Cobra a memoria do ESCOPO ATIVO (raiz ou microprojeto). So constata: nunca
+    levanta para o chamador alem do try do main.
     """
     transcript_path = payload.get("transcript_path")
     if not transcript_path or not os.path.isfile(transcript_path):
         return None  # sem transcript nao ha como constatar -> fail-open
 
-    # (c) Sem memoria inicializada -> nada a exigir. ALLOW logado.
-    if not os.path.isfile(MEMORY_ACTIVE):
-        klog("VERIFY", "persist: allow sem active-context.md (memoria nao inicializada)")
+    mem_active = memory_active_path(scope)
+    mem_rel = "alianca/" + memory_dir_rel(scope) + "/active-context.md"
+
+    # (c) Sem memoria inicializada NO ESCOPO -> nada a exigir. ALLOW logado.
+    if not os.path.isfile(mem_active):
+        klog("VERIFY", "persist: allow sem active-context.md (memoria nao inicializada) scope={}".format(scope or "raiz"))
         return None
 
     writes, session_start = _scan_transcript_writes(
@@ -249,35 +277,36 @@ def persist_reason(payload):
         return None
 
     try:
-        mtime = os.path.getmtime(MEMORY_ACTIVE)
+        mtime = os.path.getmtime(mem_active)
     except Exception:
         klog("VERIFY", "persist: allow fail-open (mtime ilegivel)")
         return None
 
     if mtime >= session_start - MTIME_SLACK_S:
-        klog("VERIFY", "persist: allow active-context.md atualizado na sessao (writes={})".format(writes))
+        klog("VERIFY", "persist: allow active-context.md atualizado na sessao (writes={} scope={})".format(writes, scope or "raiz"))
         return None
 
-    klog("VERIFY", "persist: block writes={} sem atualizar active-context.md".format(writes))
+    klog("VERIFY", "persist: block writes={} sem atualizar active-context.md scope={}".format(writes, scope or "raiz"))
     return (
         "PERSISTIR pendente: este turno editou {} arquivo(s) do projeto mas "
-        "alianca/memory/active-context.md nao foi atualizado nesta sessao. "
+        "{} (memoria do escopo ativo) nao foi atualizado nesta sessao. "
         "Atualize o active-context.md (o que mudou / proximo passo) antes de "
         "encerrar."
-    ).format(writes)
+    ).format(writes, mem_rel)
 
 
 # --- Constatacao (roda o comando de verificacao) --------------------------
 
-def _is_bootstrapped():
+def _is_bootstrapped(scope=None):
     """
-    True se o projeto ja foi inicializado pela Alianca — sinal = existe
-    alianca/memory/active-context.md (o mesmo criterio de "projeto em
-    andamento" do START-HERE §2). Serve para exigir a esteira armada
-    (verify.cmd) SO em projeto ja inicializado, sem trancar o setup no meio.
+    True se o ESCOPO ATIVO ja foi inicializado pela Alianca — sinal = existe o
+    active-context.md do escopo (raiz: alianca/memory/; microprojeto:
+    microprojects/<slug>/memory/). Mesmo criterio de "projeto em andamento" do
+    START-HERE §2. Serve para exigir a esteira armada SO em escopo ja
+    inicializado, sem trancar o setup no meio.
     """
     try:
-        return os.path.isfile(MEMORY_ACTIVE)
+        return os.path.isfile(memory_active_path(scope))
     except Exception:
         return False
 
@@ -371,6 +400,14 @@ def main():
         klog("VERIFY", "skip: stop_hook_active")
         return 0
 
+    # 1b) Escopo ATIVO deste turno (raiz vs microprojeto). Sinal = cwd do
+    #     payload + marcador ACTIVE em disco (o Stop hook nao tem prompt).
+    #     Fail-open para raiz.
+    try:
+        scope = resolve_scope(payload.get("cwd"), None)
+    except Exception:
+        scope = None
+
     # 2) Ultima mensagem do assistant. Falha de leitura = fail-open.
     try:
         msg = last_assistant_text(payload.get("transcript_path"))
@@ -389,13 +426,13 @@ def main():
     # 4/5) Portao 1 — CLAIM: alegou "pronto"? Entao constata com verify.cmd.
     #      Todo caminho de PERMITIR cai para o portao PERSISTIR abaixo
     #      (checagem ADICIONAL); so o BLOCK encerra aqui.
-    reason = _claim_reason(msg, payload)
+    reason = _claim_reason(msg, payload, scope)
     if reason:
         return _block(reason)
 
     # 6) Portao 2 — PERSISTIR (5o passo do loop). Fail-open em qualquer erro.
     try:
-        reason = persist_reason(payload)
+        reason = persist_reason(payload, scope)
     except Exception as e:
         klog("VERIFY", "persist: allow fail-open ({})".format(type(e).__name__))
         reason = None
@@ -404,11 +441,12 @@ def main():
     return 0
 
 
-def _claim_reason(msg, payload):
+def _claim_reason(msg, payload, scope=None):
     """
     Portao do CLAIM (logica original, intacta): se a ultima mensagem alega
     conclusao, roda o verify.cmd e devolve a razao de bloqueio quando a
     verificacao FALHA. Devolve None em todo caminho de permitir (fail-open).
+    A trava da esteira usa o bootstrap DO ESCOPO ATIVO.
     """
     # Sem alegacao de conclusao -> nada a constatar. PERMITIR.
     if not has_completion_claim(msg):
@@ -432,7 +470,7 @@ def _claim_reason(msg, payload):
     #       meio do setup, antes da esteira nascer -> PERMITIR (nao trancar o
     #       bootstrap; opt-in ate ele fechar).
     if not cmd:
-        if _is_bootstrapped():
+        if _is_bootstrapped(scope):
             klog("VERIFY", "esteira nao armada: block (bootstrap sem verify.cmd)")
             return (
                 "Esteira de testes NAO armada: o projeto esta em andamento "

@@ -39,6 +39,17 @@ except Exception:
     def klog(event, detail):
         pass
 
+# scope: escopo ATIVO (raiz vs microprojeto) — o X9/monitor roda no escopo certo
+# e le/grava o x9-state.md DELE. Modulo puro; fail-open p/ raiz.
+try:
+    from scope import resolve_scope, memory_dir_rel
+except Exception:
+    def resolve_scope(cwd, prompt, registry=None):
+        return None
+
+    def memory_dir_rel(scope):
+        return "memory"
+
 try:
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", newline="")
 except Exception:
@@ -48,12 +59,20 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SELFTEST = os.path.join(HERE, "selftest.py")
 SELFTEST_TIMEOUT = 90
 
-X9_DIRECTIVE = (
-    "OBRIGATORIO, primeiro ato desta conversa: rode a auditoria X9 (pontas "
-    "soltas do projeto) DELEGANDO a um subagente (ver alianca/instructions/"
-    "x9.md); traga so o resumo das pontas soltas ANTES de qualquer outro "
-    "trabalho."
-)
+def _x9_directive(scope):
+    """Diretriz X9 do arranque, apontando para o x9-state.md do ESCOPO ATIVO."""
+    try:
+        state = "alianca/" + memory_dir_rel(scope) + "/x9-state.md"
+    except Exception:
+        state = "alianca/memory/x9-state.md"
+    escopo = scope if scope else "raiz"
+    return (
+        "OBRIGATORIO, primeiro ato desta conversa: rode a auditoria X9 (pontas "
+        "soltas do projeto) DELEGANDO a um subagente (ver alianca/instructions/"
+        "x9.md); traga so o resumo das pontas soltas ANTES de qualquer outro "
+        "trabalho. Escopo ativo: {0} (estado do monitor em {1}).".format(
+            escopo, state)
+    )
 
 
 def _emit(additional_context):
@@ -107,9 +126,14 @@ def main():
         klog("SESSION", "skip source={}".format(source))
         return 0
     kernel_line = _kernel_line()
-    klog("SESSION", "startup: {}".format(kernel_line[:70]))
+    try:
+        scope = resolve_scope(None, None)
+    except Exception:
+        scope = None
+    klog("SESSION", "startup: scope={} {}".format(
+        scope or "raiz", kernel_line[:60]))
     ctx = ("== Alianca — arranque de conversa ==\n"
-           + kernel_line + "\n" + X9_DIRECTIVE)
+           + kernel_line + "\n" + _x9_directive(scope))
     _emit(ctx)
     return 0
 

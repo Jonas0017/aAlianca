@@ -57,6 +57,8 @@ O ponto crítico — é aqui que nascem as "duas memórias":
 
 > **Invariante — fonte única:** depois da adoção existe **uma** memória de projeto ativa (`alianca/memory/`). Nunca duas. Toda outra aponta para ela ou está arquivada.
 
+> **NÃO federe no bootstrap** — mesmo um projeto grande é adotado **plano** (memória única na raiz). Só quando a memória plana passar a misturar **≥ 2 bounded contexts** independentes, veja `microproject`.
+
 ## Passo 4 — Ligar o forcing function ("sempre ligado")
 
 Sem isto, a adoção não "pega": o LLM volta a ignorar o harness no próximo prompt. Instale o forcing function da ferramenta-hospedeira — **molde no `setup` (Passo 8)**. Em Claude Code: kernel no `CLAUDE.md` + hook `UserPromptSubmit`.

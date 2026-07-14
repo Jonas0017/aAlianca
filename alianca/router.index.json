@@ -160,6 +160,23 @@
       "priority": 5,
       "trigger": "criar ou alterar qualquer superfície que um humano vê ou usa — tela, página, layout, componente, formulário, fluxo, CLI/TUI, texto de interface ou mensagem de erro"
     },
+    "microproject": {
+      "file": "instructions/microproject.md",
+      "keywords": [
+        "bounded context",
+        "contexto delimitado",
+        "dominio",
+        "federada",
+        "federar",
+        "memoria federada",
+        "microprojeto",
+        "microprojetos",
+        "subsistema"
+      ],
+      "loadWhen": "evolução",
+      "priority": null,
+      "trigger": "começar uma frente nova e INDEPENDENTE (bounded context) que merece memória/agentes próprios — nunca automático, sempre PROPOSTO ao humano"
+    },
     "migration": {
       "file": "instructions/migration.md",
       "keywords": [

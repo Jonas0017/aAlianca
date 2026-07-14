@@ -52,7 +52,7 @@ harness ai/
   1. `route.py` (`UserPromptSubmit`) — casa o prompt contra `router.index.json` e injeta quais módulos carregar (roteamento determinístico, não depende do modelo ler o router); injeta também o contexto necessário não-dito via grafo `pulls`.
   2. `gate.py` (`PreToolUse`) — portão de segurança antes de ferramentas.
   3. `verify.py` (`Stop`) — 3º portão: bloco Verification, impede declarar pronto sem observar.
-  Suporte: `klog.py` grava `kernel.log` (dmesg do harness, observável); `compile.py` gera o `router.index.json` (com grafo `pulls`); `selftest.py` com **24 PASS**; `settings.snippet.json` + `verify.cmd` para instalação/verificação.
+  Suporte: `klog.py` grava `kernel.log` (dmesg do harness, observável); `compile.py` gera o `router.index.json` (com grafo `pulls`); `selftest.py` (rode e leia o RESUMO — hoje **89 PASS** com a federação de microprojetos); `settings.snippet.json` + `verify.cmd` para instalação/verificação.
 - ✅ **Validação — 2 rounds em `VALIDATION.md`:** (1) A/B com vs sem harness em duas LLMs (Claude e Copilot, 2026-06-08) — harness ganha em testes/memória/estrutura/segurança registrada, model-agnostic confirmado; (2) kernel + Ollama local (`qwen2.5-coder:7b`, 2026-07-01) — o contexto injetado virou a chave do defeito nº1 (senha em texto puro → bcrypt) num modelo 7B.
 - ✅ **Auditoria X9 + parecer de arquiteto (2026-07-01)** — aprovaram correções, todas aplicadas: contagens/precedência/R≥40 corrigidos nos docs, README reposicionado honesto, `CLAUDE.md` da raiz criado (a Aliança aplicando a própria receita), memória do repo iniciada (`alianca/memory/active-context.md` + `x9-state.md`).
 
@@ -66,4 +66,4 @@ harness ai/
 
 1. Leia este HANDOFF.md.
 2. Leia `alianca/START-HERE.md` e `alianca/router.md` para o modelo mental; `alianca/memory/active-context.md` tem o estado corrente.
-3. Rode `alianca/kernel/selftest.py` para confirmar o kernel (esperado: 24 PASS) e comece o passo 1 (dogfood real).
+3. Rode `alianca/kernel/selftest.py` para confirmar o kernel (**rode e leia o RESUMO — deve terminar em PASS, exit 0**; hoje 89 PASS) e comece o passo 1 (dogfood real).

@@ -119,6 +119,8 @@ Este nível é uma **estimativa de partida**, não um veredito. O questionário 
 
 > **Memória mínima existe desde o Nível 0:** `memory/active-context.md` (estado para retomar) e `memory/stack.md` (ferramentas). É o que o `START-HERE.md §2` usa para detectar "projeto em andamento". A memória **segmentada** (architecture, business-rules, decisions, archive) cresce a partir do Nível 2-3.
 
+> **NÃO federe no bootstrap** — nenhum projeto nasce federado, nem um sistema grande: começa **plano** (memória única na raiz). Só quando **≥ 2 bounded contexts** independentes surgirem, veja `microproject`.
+
 - **Nível 0:** `README.md`, `TASKS.md` + `memory/` mínima (`active-context.md`, `stack.md`). Backbone automático/invisível — sem hook/CI; o agente roda testes e lint no passo VERIFICAR de cada turno (`START-HERE` §4).
 - **Nível 1:** + `ARCHITECTURE.md`, `memory/vision.md`. Backbone simples explícito.
 - **Nível 2:** `docs/` (`requirements`, `architecture`), `tasks/` (índice `TASKS.md` + arquivo por tarefa, ver `tasks`), `tests/`, CI básico, `memory/architecture.md` (segmentação começa).

@@ -51,6 +51,7 @@ ROUTE = os.path.join(HERE, "route.py")
 GATE = os.path.join(HERE, "gate.py")
 VERIFY = os.path.join(HERE, "verify.py")
 KLOG = os.path.join(HERE, "klog.py")
+SCOPE = os.path.join(HERE, "scope.py")
 COMPILE = os.path.join(HERE, "compile.py")
 INDEX = os.path.abspath(os.path.join(HERE, os.pardir, "router.index.json"))
 
@@ -365,6 +366,7 @@ def _run_verify_isolated(assistant_text, verify_cmd_line=None):
     try:
         shutil.copy(VERIFY, os.path.join(tdir, "verify.py"))
         shutil.copy(KLOG, os.path.join(tdir, "klog.py"))
+        shutil.copy(SCOPE, os.path.join(tdir, "scope.py"))
         if verify_cmd_line is not None:
             with open(os.path.join(tdir, "verify.cmd"), "w", encoding="utf-8") as f:
                 f.write("# fixture verify.cmd (isolado) — nao e o do repo\n")
@@ -441,6 +443,7 @@ def _run_esteira_case(assistant_text, bootstrapped, verify_cmd_line=None,
         os.makedirs(kdir)
         shutil.copy(VERIFY, os.path.join(kdir, "verify.py"))
         shutil.copy(KLOG, os.path.join(kdir, "klog.py"))
+        shutil.copy(SCOPE, os.path.join(kdir, "scope.py"))
         if verify_cmd_line is not None:
             with open(os.path.join(kdir, "verify.cmd"), "w", encoding="utf-8") as f:
                 f.write("# fixture verify.cmd (isolado) — nao e o do repo\n")
@@ -576,6 +579,7 @@ def _run_persist_case(project_writes, active_context, active_age_s,
         os.makedirs(kdir)
         shutil.copy(VERIFY, os.path.join(kdir, "verify.py"))
         shutil.copy(KLOG, os.path.join(kdir, "klog.py"))
+        shutil.copy(SCOPE, os.path.join(kdir, "scope.py"))
         # NUNCA copiar o verify.cmd real (recursao). Sem claim no texto,
         # o portao do claim permite e cai no PERSISTIR.
         if active_context:
@@ -726,6 +730,287 @@ def test_compile():
           "refactor.pulls ausente/vazio: {0}".format(mods.get("refactor")))
 
 
+# ===========================================================================
+# 6) scope.py — resolucao do escopo (pista/cwd/ACTIVE/fallback) + memoria +
+#    merge de indices. Modulo PURO: importado in-process (sem efeito colateral).
+# ===========================================================================
+def _load_scope_module():
+    spec = importlib.util.spec_from_file_location("alianca_scope_test", SCOPE)
+    smod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(smod)
+    return smod
+
+
+def test_scope_resolve():
+    smod = _load_scope_module()
+    tdir = tempfile.mkdtemp(prefix="alianca_scope_")
+    try:
+        mp = os.path.join(tdir, "microprojects")
+        for slug in ("pagseg", "outro"):
+            os.makedirs(os.path.join(mp, slug, "memory"))
+            os.makedirs(os.path.join(mp, slug, "code"))
+        registry = {
+            "pagseg": {"path": "microprojects/pagseg",
+                       "codeDirs": [os.path.join(mp, "pagseg", "code")],
+                       "status": "ativo", "hoisted": []},
+            "outro": {"path": "microprojects/outro",
+                      "codeDirs": [os.path.join(mp, "outro", "code")],
+                      "status": "ativo", "hoisted": []},
+        }
+        reg_path = os.path.join(mp, "registry.json")
+        act_path = os.path.join(mp, "ACTIVE")
+        with open(reg_path, "w", encoding="utf-8") as f:
+            json.dump(registry, f)
+        smod.REGISTRY_PATH = reg_path
+        smod.ACTIVE_PATH = act_path
+
+        def set_active(val):
+            with open(act_path, "w", encoding="utf-8") as f:
+                f.write(val)
+
+        pagseg_cwd = os.path.join(mp, "pagseg", "code", "sub")
+        outro_cwd = os.path.join(mp, "outro", "code")
+
+        # PRECEDENCIA 1: pista [mp:x] vence cwd e ACTIVE.
+        set_active("outro")
+        check("scope/pista vence cwd+ACTIVE",
+              smod.resolve_scope(outro_cwd, "muda [mp:pagseg] aqui") == "pagseg",
+              "pista nao teve precedencia")
+        # PRECEDENCIA 2: sem pista, cwd (codeDirs) vence ACTIVE.
+        set_active("pagseg")
+        check("scope/cwd (codeDirs) vence ACTIVE",
+              smod.resolve_scope(outro_cwd, "sem pista") == "outro",
+              "cwd nao teve precedencia sobre ACTIVE")
+        # PRECEDENCIA 3: sem pista nem cwd, ACTIVE decide.
+        set_active("pagseg")
+        check("scope/ACTIVE decide (sem pista nem cwd)",
+              smod.resolve_scope(None, "sem pista") == "pagseg", "ACTIVE nao casou")
+        # cwd em subpasta de codeDirs tambem casa (prefixo).
+        check("scope/cwd subpasta de codeDir casa (prefixo)",
+              smod.resolve_scope(pagseg_cwd, "sem pista") == "pagseg", "prefixo nao casou")
+        # pista para slug INEXISTENTE degrada (aqui ACTIVE=pagseg toma o lugar).
+        set_active("")
+        check("scope/pista inexistente degrada p/ raiz",
+              smod.resolve_scope(None, "[mp:fantasma]") is None, "nao degradou")
+        # ACTIVE vazio + nada -> raiz.
+        check("scope/ACTIVE vazio -> raiz",
+              smod.resolve_scope(None, "conversa normal") is None, "nao caiu na raiz")
+        # ACTIVE orfao (slug fora do registry) -> raiz (fail-open no runtime).
+        set_active("fantasma")
+        check("scope/ACTIVE orfao -> raiz",
+              smod.resolve_scope(None, "x") is None, "ACTIVE orfao nao degradou")
+
+        # BACK-COMPAT: registry vazio {} -> SEMPRE raiz (comportamento de hoje).
+        empty_reg = os.path.join(tdir, "empty.json")
+        with open(empty_reg, "w", encoding="utf-8") as f:
+            f.write("{}")
+        smod.REGISTRY_PATH = empty_reg
+        set_active("pagseg")
+        check("scope/back-compat: registry vazio -> raiz",
+              smod.resolve_scope(pagseg_cwd, "[mp:pagseg]") is None,
+              "registry vazio nao caiu na raiz")
+
+        # FAIL-OPEN: registry corrompido -> raiz, sem crash.
+        bad_reg = os.path.join(tdir, "bad.json")
+        with open(bad_reg, "w", encoding="utf-8") as f:
+            f.write("{ nao e json valido :: ]")
+        smod.REGISTRY_PATH = bad_reg
+        check("scope/fail-open: registry corrompido -> raiz (sem crash)",
+              smod.resolve_scope(pagseg_cwd, "[mp:pagseg]") is None,
+              "registry corrompido nao degradou")
+
+        # Caminhos de memoria por escopo.
+        check("scope/memory_dir_rel raiz",
+              smod.memory_dir_rel(None) == "memory", smod.memory_dir_rel(None))
+        check("scope/memory_dir_rel microprojeto",
+              smod.memory_dir_rel("pagseg") == "microprojects/pagseg/memory",
+              smod.memory_dir_rel("pagseg"))
+    finally:
+        shutil.rmtree(tdir, ignore_errors=True)
+
+
+def test_merge_indices():
+    smod = _load_scope_module()
+    root = {"indexFormatVersion": "3.0", "modules": {
+        "security": {"file": "instructions/security.md", "keywords": ["senha"]},
+        "testing": {"file": "instructions/testing.md", "keywords": ["teste"]}}}
+    local = {"modules": {
+        "security": {"file": "microprojects/x/instructions/security.md",
+                     "keywords": ["local"]},
+        "pagamento": {"file": "microprojects/x/instructions/pagamento.md",
+                      "keywords": ["cartao"]}}}
+    merged = smod.merge_indices(root, local)
+    mods = merged.get("modules", {})
+    check("merge: local SOBREPOE o homonimo da raiz",
+          mods.get("security", {}).get("file")
+          == "microprojects/x/instructions/security.md", "sec={0}".format(mods.get("security")))
+    check("merge: modulo so-local fica visivel",
+          "pagamento" in mods, "mods={0}".format(sorted(mods)))
+    check("merge: modulo so-raiz continua (fallback)",
+          mods.get("testing", {}).get("file") == "instructions/testing.md",
+          "testing={0}".format(mods.get("testing")))
+    check("merge: root None -> devolve o local",
+          smod.merge_indices(None, local) == local, "root None quebrou")
+    check("merge: local None -> devolve a raiz",
+          smod.merge_indices(root, None) == root, "local None quebrou")
+
+
+def _mk_graph(tdir, registry, active="", files=None):
+    mp = os.path.join(tdir, "microprojects")
+    os.makedirs(mp, exist_ok=True)
+    with open(os.path.join(mp, "registry.json"), "w", encoding="utf-8") as f:
+        json.dump(registry, f)
+    with open(os.path.join(mp, "ACTIVE"), "w", encoding="utf-8") as f:
+        f.write(active)
+    for rel, content in (files or {}).items():
+        p = os.path.join(tdir, *rel.split("/"))
+        os.makedirs(os.path.dirname(p), exist_ok=True)
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(content)
+    return tdir
+
+
+def test_graph_integrity():
+    smod = _load_scope_module()
+
+    def graph_probs(registry, active="", files=None):
+        t = tempfile.mkdtemp(prefix="alianca_graph_")
+        try:
+            _mk_graph(t, registry, active=active, files=files)
+            return smod.validate_graph(t)
+        finally:
+            shutil.rmtree(t, ignore_errors=True)
+
+    base = {"a": {"path": "microprojects/a", "codeDirs": [],
+                  "status": "ativo", "hoisted": []}}
+    mem = {"microprojects/a/memory/active-context.md": "# ctx\n"}
+
+    # (a) grafo limpo -> sem problemas.
+    check("graph/limpo: sem problemas",
+          graph_probs(base, active="a", files=mem) == [], "esperava lista vazia")
+
+    # (b) microprojeto SEM memory/ -> falha.
+    probs = graph_probs(base, active="", files={})
+    check("graph/sem-memory: microprojeto sem memory/ = falha",
+          any("sem pasta memory" in p for p in probs), "probs={0}".format(probs))
+
+    # (c) ACTIVE orfao (slug fora do registry) -> falha.
+    probs = graph_probs(base, active="fantasma", files=mem)
+    check("graph/ACTIVE-orfao: falha",
+          any("orfao" in p for p in probs), "probs={0}".format(probs))
+
+    # (d) aresta de hoisting quebrada (destino raiz ausente) -> falha.
+    reg_bh = {"a": {"path": "microprojects/a", "codeDirs": [], "status": "ativo",
+                    "hoisted": [{"fact": "f", "to": "memory/decisions/x.md",
+                                 "stub": "microprojects/a/memory/f.md"}]}}
+    files_bh = dict(mem)
+    files_bh["microprojects/a/memory/f.md"] = "> hoisted -> alianca/memory/decisions/x.md\n"
+    probs = graph_probs(reg_bh, active="a", files=files_bh)  # sem criar o destino raiz
+    check("graph/hoisting-quebrado: destino raiz ausente = falha",
+          any("destino raiz ausente" in p for p in probs), "probs={0}".format(probs))
+
+    # (e) anti-duplicacao: fato hoisted com conteudo NAO-STUB no local -> falha.
+    files_dup = dict(mem)
+    files_dup["memory/decisions/x.md"] = "# ADR\nconteudo real na raiz\n"
+    files_dup["microprojects/a/memory/f.md"] = (
+        "# regra completa duplicada no local, sem marcador de stub, "
+        "com conteudo substancial que deveria ter subido para a raiz.\n" * 8)
+    probs = graph_probs(reg_bh, active="a", files=files_dup)
+    check("graph/anti-dup: local nao-stub (conteudo duplicado) = falha",
+          any("nao e stub" in p for p in probs), "probs={0}".format(probs))
+
+    # (f) anti-duplicacao OK: destino raiz existe + local e STUB marcado.
+    files_ok = dict(mem)
+    files_ok["memory/decisions/x.md"] = "# ADR\nconteudo real na raiz\n"
+    files_ok["microprojects/a/memory/f.md"] = "> hoisted -> alianca/memory/decisions/x.md\n"
+    probs = graph_probs(reg_bh, active="a", files=files_ok)
+    check("graph/anti-dup: destino raiz + stub valido = sem problema",
+          probs == [], "probs={0}".format(probs))
+
+
+# ===========================================================================
+# 6b) verify.py — portao PERSISTIR cobra a memoria do ESCOPO ATIVO
+# ===========================================================================
+def _run_persist_scope_case(slug, project_writes, active_age_s):
+    """
+    Layout com microprojeto ATIVO: verify deve cobrar a memoria DO ESCOPO
+    (microprojects/<slug>/memory/active-context.md), mesmo com a raiz fresca.
+    """
+    tdir = tempfile.mkdtemp(prefix="alianca_pscope_")
+    try:
+        kdir = os.path.join(tdir, "kernel")
+        os.makedirs(kdir)
+        shutil.copy(VERIFY, os.path.join(kdir, "verify.py"))
+        shutil.copy(KLOG, os.path.join(kdir, "klog.py"))
+        shutil.copy(SCOPE, os.path.join(kdir, "scope.py"))
+        mp = os.path.join(tdir, "microprojects")
+        os.makedirs(mp)
+        with open(os.path.join(mp, "registry.json"), "w", encoding="utf-8") as f:
+            json.dump({slug: {"path": "microprojects/" + slug, "codeDirs": [],
+                              "status": "ativo", "hoisted": []}}, f)
+        with open(os.path.join(mp, "ACTIVE"), "w", encoding="utf-8") as f:
+            f.write(slug + "\n")
+        memdir = os.path.join(mp, slug, "memory")
+        os.makedirs(memdir)
+        ac = os.path.join(memdir, "active-context.md")
+        with open(ac, "w", encoding="utf-8") as f:
+            f.write("# ctx local\n")
+        old = time.time() - active_age_s
+        os.utime(ac, (old, old))
+        # Raiz FRESCA de proposito: se verify olhasse a raiz, nao bloquearia.
+        roomem = os.path.join(tdir, "memory")
+        os.makedirs(roomem)
+        with open(os.path.join(roomem, "active-context.md"), "w", encoding="utf-8") as f:
+            f.write("# raiz fresca\n")
+        transcript = _write_persist_transcript(tdir, project_writes)
+        payload = {"transcript_path": transcript, "cwd": tdir,
+                   "stop_hook_active": False}
+        proc = subprocess.run(
+            [PY, os.path.join(kdir, "verify.py")],
+            input=json.dumps(payload).encode("utf-8"),
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        )
+        return proc.returncode, proc.stdout.decode("utf-8", "replace")
+    finally:
+        shutil.rmtree(tdir, ignore_errors=True)
+
+
+def test_persist_scope():
+    # (a) memoria LOCAL velha + 2 escritas -> BLOCK citando a memoria do escopo
+    #     (mesmo com a raiz fresca: prova que cobra o ESCOPO certo).
+    code, out = _run_persist_scope_case("pagseg", 2, active_age_s=3600)
+    check("persist-scope: memoria local velha -> BLOCK cita o microprojeto",
+          code == 0 and _is_block(out) and "microprojects/pagseg/memory" in out,
+          "exit={0} out={1!r}".format(code, out[:250]))
+    # (b) memoria LOCAL fresca -> ALLOW (persistiu no escopo nesta sessao).
+    code, out = _run_persist_scope_case("pagseg", 2, active_age_s=0)
+    check("persist-scope: memoria local fresca -> ALLOW",
+          code == 0 and not _is_block(out),
+          "exit={0} out={1!r}".format(code, out[:200]))
+
+
+# ===========================================================================
+# 6c) session_start.py — X9/monitor aponta p/ o x9-state.md do escopo ativo
+# ===========================================================================
+def test_session_start_scope():
+    SS = os.path.join(HERE, "session_start.py")
+    env = dict(os.environ)
+    env["ALIANCA_SS_NO_SELFTEST"] = "1"
+    proc = subprocess.run(
+        [PY, SS], input=json.dumps({"source": "startup"}).encode("utf-8"),
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+    ok = False
+    try:
+        ctx = json.loads(proc.stdout.decode("utf-8", "replace"))[
+            "hookSpecificOutput"]["additionalContext"]
+        ok = ("x9-state.md" in ctx and "Escopo ativo:" in ctx)
+    except Exception:
+        ok = False
+    check("session_start/scope: X9 aponta p/ x9-state.md do escopo ativo",
+          proc.returncode == 0 and ok,
+          "out={0!r}".format(proc.stdout[:200]))
+
+
 # ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
@@ -744,6 +1029,11 @@ def main():
     test_klog()
     test_frontmatter_multiline()
     test_compile()
+    test_scope_resolve()
+    test_merge_indices()
+    test_graph_integrity()
+    test_persist_scope()
+    test_session_start_scope()
     print("")
     print("RESUMO: {0} PASS — kernel verificado.".format(_PASSES))
     return 0

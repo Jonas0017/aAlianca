@@ -2,9 +2,24 @@
 
 > Memória do modo monitor do `x9` (ver `instructions/x9.md`): registra o que já foi visto, fechado ou **conscientemente adiado**, para a próxima varredura alertar só o delta — sem re-alertar o que já foi decidido.
 
-**Última varredura:** 2026-07-01 (auditoria X9 completa + parecer de arquiteto)
+**Última varredura:** 2026-07-14 (varredura pós-federação de microprojetos)
 
-## Fechados nesta rodada (2026-07-01)
+## Fechados nesta rodada (2026-07-14)
+
+- **Ponta ALTA:** snapshot inicial inexistente — o `START-HERE §2` mandava ler um snapshot mais recente em `snapshots/` que não existia. Gerado `snapshots/snapshot-2026-07-14-federacao-microprojetos.md` (estado consolidado do harness).
+- **Ponta MÉDIA:** números de selftest defasados (58/64/24 antigos) — corrigidos para **89 PASS** em `memory/active-context.md`, `memory/stack.md` e `HANDOFF.md` (este parametrizado para "rode e leia o RESUMO").
+- **Ponta MÉDIA:** `x9-state.md` parado em 2026-07-01 — atualizado (este registro).
+- Decisão da federação registrada em `memory/decisions/` (ADR) + `active-context.md`/snapshot atualizados para apontar.
+
+## Abertas / adiadas nesta rodada (não re-alertar até virar delta)
+
+| Ponta solta | Status/decisão | Data |
+|---|---|---|
+| Esteira local por escopo — `CMD_FILE`/`verify.cmd` do Stop hook roda sempre a esteira da RAIZ, não a do microprojeto ativo | follow-up curto (resolver `CMD_FILE` via `scope.py` no `verify.py`) — pendente | 2026-07-14 |
+| Paridade do `settings.snippet.json` com os hooks vigentes (session_start etc.) | verificar/atualizar — pendente | 2026-07-14 |
+| `vision.md` da raiz e "Mapa da pasta" (START-HERE §6) sem entradas de `microprojects/` | atualizar mapa/visão — pendente | 2026-07-14 |
+
+## Fechados na rodada 2026-07-01
 
 - Contagens defasadas ("15/17 instruções", "16 seções") em README, instructions/README e HANDOFF — corrigidas para **18 módulos / 17 seções (§0–§16)**.
 - Precedência do PROTOCOL §15.A3 sem `interface` — alinhada ao `router.md`.

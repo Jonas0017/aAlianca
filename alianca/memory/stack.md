@@ -3,7 +3,7 @@
 > Comandos concretos e fatos de ambiente deste repo. O backbone (`testing`, `code-quality`) e os benchmarks leem daqui.
 
 ## Kernel
-- Testes do kernel: `python alianca/kernel/selftest.py` (58 PASS).
+- Testes do kernel: `python alianca/kernel/selftest.py` (89 PASS).
 - Verificação do repo (3º portão): `alianca/kernel/verify.cmd`.
 - Índice roteador: `python alianca/kernel/compile.py` gera `router.index.json` (grafo `pulls`).
 

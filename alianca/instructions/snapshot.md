@@ -44,6 +44,7 @@ Um snapshot é um documento **autocontido** que permite outra sessão (outro mod
 ## Regras
 
 - **Autossuficiente:** se você precisaria do histórico para entender, o snapshot está incompleto.
+- **Por escopo (memória federada):** o snapshot mora no **escopo ativo** — raiz: `alianca/snapshots/`; microprojeto: dentro de `alianca/microprojects/<slug>/` (ver `microproject`, snapshot inicial e de fechamento). Um snapshot de microprojeto retoma **aquele** bounded context; o da raiz retoma o projeto como um todo.
 - Nome: `snapshots/snapshot-AAAA-MM-DD-<slug>.md`. Se houver mais de um no mesmo dia/slug, acrescente um sufixo (`-2` ou a hora `-HHMM`).
 - O mais recente é a **fonte de verdade** para retomada (ver `START-HERE.md` §2).
 - Ao gerar, **atualize também `memory/active-context.md`** para apontar ao snapshot.
